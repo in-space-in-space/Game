@@ -926,3 +926,4 @@ int Bot_Use(player &player)
 		return 1;//成功使用卡牌
 	}
 }
+//嘿嘿
