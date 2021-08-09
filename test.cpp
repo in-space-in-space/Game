@@ -1,77 +1,77 @@
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
-#include<time.h>
-typedef struct Card//¿¨ÅÆ¶¨Òå
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+typedef struct Card //ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½
 {
-	int Level;//¿¨ÅÆµÈ¼¶
-	int Type;//¿¨ÅÆÀàÐÍ:¹¥»÷\·ÀÓù
-	//¹¥»÷ÅÆ:tpye=1 ·ÀÓùÅÆ:type=0
-	int Kind;//¿¨ÅÆÖÖÀà:ÌåÊõµÈ
-	//ÌåÊõkind=0 ½£kind=1 ¹­kind=2 µ¶kind=3 ´Ìkind=4 Ç¹kind=5
-	int Fun[10];//¿¨ÅÆÐ§¹û
-	//Ñ¹ÖÆfun=0 ÖÆºâfun=1 ²»Çüfun=2 ¹¥ÐÄfun=3 ×·»÷fun=4
-	//±ê¼Çfun=5 ÖÐ¶¾fun=6 ·âÓ¡fun=7 Ò×ÉËfun=7 ´©´Ìfun=8
-	char Name[10];//¿¨ÅÆÃû³Æ
-	char text[100];//¿¨ÅÆÃèÊö
-}Card, Cards[100];
-typedef struct Deck//ÅÆ¿â¶¨Òå
+	int Level; //ï¿½ï¿½ï¿½ÆµÈ¼ï¿½
+	int Type;  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:tpye=1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:type=0
+	int Kind; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//ï¿½ï¿½ï¿½ï¿½kind=0 ï¿½ï¿½kind=1 ï¿½ï¿½kind=2 ï¿½ï¿½kind=3 ï¿½ï¿½kind=4 Ç¹kind=5
+	int Fun[10]; //ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
+	//Ñ¹ï¿½ï¿½fun=0 ï¿½Æºï¿½fun=1 ï¿½ï¿½ï¿½ï¿½fun=2 ï¿½ï¿½ï¿½ï¿½fun=3 ×·ï¿½ï¿½fun=4
+	//ï¿½ï¿½ï¿½fun=5 ï¿½Ð¶ï¿½fun=6 ï¿½ï¿½Ó¡fun=7 ï¿½ï¿½ï¿½ï¿½fun=7 ï¿½ï¿½ï¿½ï¿½fun=8
+	char Name[10];	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	char text[100]; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+} Card, Cards[100];
+typedef struct Deck //ï¿½Æ¿â¶¨ï¿½ï¿½
 {
 	Card card[20];
 	int CardNum = 0;
-}Deck;
-typedef struct Hand//ÊÖÅÆ¶¨Òå
+} Deck;
+typedef struct Hand //ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½
 {
 	Card card[5];
 	int CardNum = 0;
-	int AttackNum=0;
-	int DefenceNum=0;
-}Hand;
-typedef struct player//Íæ¼Ò¶¨Òå
+	int AttackNum = 0;
+	int DefenceNum = 0;
+} Hand;
+typedef struct player //ï¿½ï¿½Ò¶ï¿½ï¿½ï¿½
 {
-	int bot=0;
+	int bot = 0;
 	char playername[10];
-	int HP = 10;//Íæ¼ÒÉúÃü
-	Hand hand;//Íæ¼ÒÊÖÅÆ
-	Deck deck;//Íæ¼ÒÌ×ÅÆ
-	Deck deck_inturn;//ÁÙÊ±Ì×ÅÆ
-	int Attack_level_plus = 0;//¹¥»÷µÈ¼¶+1
-	int Defence_level_plus = 0;//·ÀÓùµÈ¼¶+1
-	int Card_level_plus = 0;//¿¨ÅÆµÈ¼¶+1
-	int Poisoned = 0;//ÖÐ¶¾
-	int Marked[5];//±ê¼Ç
-	int Sealed[5];//·âÓ¡
-	int Turn_mode;//»ØºÏÄ£Ê½,1Îª½ø¹¥,0Îª·ÀÊØ
-    Card Card_used;//ÉÏ»ØºÏÊ¹ÓÃ¿¨ÅÆ
-    int acttion;//ÉÏ»ØºÏÐÐ¶¯,1Îª³öÅÆ,0Îª³éÅÆ
-}player;
-/*------------------------------¶¨Òå²¿·Ö--------------------------------------------*/
-int Preparation();//ÓÎÏ·¿ªÊ¼Ç°×¼±¸
-int GetCard(Cards& cards);//´ÓÎÄ¼þÖÐ¶ÁÈ¡ËùÓÐ¿¨ÅÆÐÅÏ¢
-void Deck_Initialize(player &player);//Ì×ÅÆ³õÊ¼»¯
-void PlayTurn(Cards cards, player& player1, player& player2);
-int StartTurn(player& player1, player& player2);
+	int HP = 10;				//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	Hand hand;					//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	Deck deck;					//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	Deck deck_inturn;			//ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
+	int Attack_level_plus = 0;	//ï¿½ï¿½ï¿½ï¿½ï¿½È¼ï¿½+1
+	int Defence_level_plus = 0; //ï¿½ï¿½ï¿½ï¿½ï¿½È¼ï¿½+1
+	int Card_level_plus = 0;	//ï¿½ï¿½ï¿½ÆµÈ¼ï¿½+1
+	int Poisoned = 0;			//ï¿½Ð¶ï¿½
+	int Marked[5];				//ï¿½ï¿½ï¿½
+	int Sealed[5];				//ï¿½ï¿½Ó¡
+	int Turn_mode;				//ï¿½Øºï¿½Ä£Ê½,1Îªï¿½ï¿½ï¿½ï¿½,0Îªï¿½ï¿½ï¿½ï¿½
+	Card Card_used;				//ï¿½Ï»Øºï¿½Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
+	int acttion;				//ï¿½Ï»Øºï¿½ï¿½Ð¶ï¿½,1Îªï¿½ï¿½ï¿½ï¿½,0Îªï¿½ï¿½ï¿½ï¿½
+} player;
+/*------------------------------ï¿½ï¿½ï¿½å²¿ï¿½ï¿½--------------------------------------------*/
+int Preparation();					  //ï¿½ï¿½Ï·ï¿½ï¿½Ê¼Ç°×¼ï¿½ï¿½
+int GetCard(Cards &cards);			  //ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½Ð¶ï¿½È¡ï¿½ï¿½ï¿½Ð¿ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+void Deck_Initialize(player &player); //ï¿½ï¿½ï¿½Æ³ï¿½Ê¼ï¿½ï¿½
+void PlayTurn(Cards cards, player &player1, player &player2);
+int StartTurn(player &player1, player &player2);
 int Start_Drawing(player &player);
 int Drawing(player &player);
 int First_Attack_Decide();
-int Choose(player& player);
-int Use(player&player);
+int Choose(player &player);
+int Use(player &player);
 void Show_Turn(player player);
 void Show_HP(player player);
 void Show_Hand(player player);
-int Settlement(player& player1,player& player2);
+int Settlement(player &player1, player &player2);
 void Level_calculate(player &player);
-void Card_damage(player& player1,player& player2);
-int If_Over(player player1,player player2);
+void Card_damage(player &player1, player &player2);
+int If_Over(player player1, player player2);
 void PlayTurn_Over(player player1, player player2, int flag);
-void Card_function(player &player1,player &player2);
-int Fun_0_yazhi(player &player1,player &player2);
+void Card_function(player &player1, player &player2);
+int Fun_0_yazhi(player &player1, player &player2);
 int Bot_choose(player &player);
 int Bot_Draw(player &player);
 int Bot_Use(player &player);
-/*------------------------------¿¨ÅÆÐ§¹ûº¯Êý----------------------------------------*/
-void Ge_Dang(player &player1,player &player2);
-/*------------------------------º¯Êý²¿·Ö--------------------------------------------*/
+/*------------------------------ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½----------------------------------------*/
+void Ge_Dang(player &player1, player &player2);
+/*------------------------------ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½--------------------------------------------*/
 int main()
 {
 	Cards cards;
@@ -80,50 +80,51 @@ int main()
 	int op;
 	if (GetCard(cards))
 	{
-		printf("   ¿¨ÅÆ¶ÁÈ¡Íê±Ï!\n   °´ÏÂ»Ø³µ¿ªÊ¼!\n");
+		printf("   ï¿½ï¿½ï¿½Æ¶ï¿½È¡ï¿½ï¿½ï¿½!\n   ï¿½ï¿½ï¿½Â»Ø³ï¿½ï¿½ï¿½Ê¼!\n");
 		getchar();
 		system("cls");
 	}
 	else
 	{
-		printf("   ¿¨ÅÆ¶ÁÈ¡Ê§°Ü!\n");
+		printf("   ï¿½ï¿½ï¿½Æ¶ï¿½È¡Ê§ï¿½ï¿½!\n");
 		getchar();
 		return 0;
 	}
-	{//Ñ¡ÔñÊÇ·ñÓëµçÄÔ½øÐÐÓÎÏ·
-		printf(" ÊÇ·ñÓëµçÄÔ¶ÔÕ½?\n 1.ÊÇ 0.·ñ\n");
-		scanf("%d",&op);
-		if(op)
-		player2.bot=1;
-		else;
+	{ //Ñ¡ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Ô½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·
+		printf(" ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½Õ½?\n 1.ï¿½ï¿½ 0.ï¿½ï¿½\n");
+		scanf("%d", &op);
+		if (op)
+			player2.bot = 1;
+		else
+			;
 		system("cls");
 	}
 	Deck_Initialize(player1);
 	Deck_Initialize(player2);
 	PlayTurn(cards, player1, player2);
 }
-void Deck_Initialize(player &player)//ÎÊÌâ³öÔÚÕâ!
+void Deck_Initialize(player &player) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½!
 {
 	for (int i = 0; i < 5; i++)
 	{
 		strcpy(player.deck.card[i].Name, "È­");
-		strcpy(player.deck.card[i].text, "ÎÞ");
+		strcpy(player.deck.card[i].text, "ï¿½ï¿½");
 		player.deck.card[i].Level = 1;
 		player.deck.card[i].Kind = 0;
 		player.deck.card[i].Type = 1;
 	}
 	for (int i = 5; i < 7; i++)
 	{
-		strcpy(player.deck.card[i].Name, "ÍÈ");
-		strcpy(player.deck.card[i].text, "ÎÞ");
+		strcpy(player.deck.card[i].Name, "ï¿½ï¿½");
+		strcpy(player.deck.card[i].text, "ï¿½ï¿½");
 		player.deck.card[i].Level = 2;
 		player.deck.card[i].Kind = 0;
 		player.deck.card[i].Type = 1;
 	}
 	for (int i = 7; i < 10; i++)
 	{
-		strcpy(player.deck.card[i].Name, "¸ñµ²");
-		strcpy(player.deck.card[i].text, "Ñ¹ÖÆ:³éÒ»ÕÅÅÆ»ò´ò³öÒ»ÕÅ¹¥»÷ÅÆ");
+		strcpy(player.deck.card[i].Name, "ï¿½ï¿½");
+		strcpy(player.deck.card[i].text, "Ñ¹ï¿½ï¿½:ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Æ»ï¿½ï¿½ï¿½Ò»ï¿½Å¹ï¿½ï¿½ï¿½ï¿½ï¿½");
 		player.deck.card[i].Level = 2;
 		player.deck.card[i].Fun[0] = 1;
 		player.deck.card[i].Kind = 0;
@@ -131,13 +132,15 @@ void Deck_Initialize(player &player)//ÎÊÌâ³öÔÚÕâ!
 	}
 	player.deck.CardNum = 10;
 }
-int GetCard(Cards& cards)//´ÓÎÄ¼þÖÐ»ñÈ¡¿¨ÅÆ
+int GetCard(Cards &cards) //ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½Ð»ï¿½È¡ï¿½ï¿½ï¿½ï¿½
 {
-	FILE* fp;
-	int x,Card_Num;
-	if (fp = fopen(".\\card.txt", "r"));
-	else return 0;
-	fscanf(fp,"%d",&Card_Num);
+	FILE *fp;
+	int x, Card_Num;
+	if (fp = fopen(".\\card.txt", "r"))
+		;
+	else
+		return 0;
+	fscanf(fp, "%d", &Card_Num);
 	for (int i = 0; i < Card_Num; i++)
 	{
 		fscanf(fp, "%s %d %d %d %d %s", cards[i].Name, &cards[i].Type, &cards[i].Level, &cards[i].Kind, &x, cards[i].text);
@@ -146,78 +149,78 @@ int GetCard(Cards& cards)//´ÓÎÄ¼þÖÐ»ñÈ¡¿¨ÅÆ
 	fclose(fp);
 	return 1;
 }
-void PlayTurn(Cards cards, player& player1, player& player2)//ÓÎÏ·»ØºÏ
+void PlayTurn(Cards cards, player &player1, player &player2) //ï¿½ï¿½Ï·ï¿½Øºï¿½
 {
-	player1.deck_inturn = player1.deck;//»ØºÏÖÐÊ¹ÓÃµÄÌ×ÅÆ¸´ÖÆ
+	player1.deck_inturn = player1.deck; //ï¿½Øºï¿½ï¿½ï¿½Ê¹ï¿½Ãµï¿½ï¿½ï¿½ï¿½Æ¸ï¿½ï¿½ï¿½
 	player2.deck_inturn = player2.deck;
-	int TurnNum = 1,Over_flag=0;
+	int TurnNum = 1, Over_flag = 0;
 	StartTurn(player1, player2);
 	while (1)
 	{
-        if(player1.Turn_mode)
-        {
-			printf(" µÚ%d»ØºÏ:\n",TurnNum);
-            player1.acttion=Choose(player1);
-			printf(" µÚ%d»ØºÏ:\n",TurnNum);
-			if(!player2.bot)
-            player2.acttion=Choose(player2);
-			else
-			player2.acttion=Bot_choose(player2);
-        }
-        else
-        {
-			printf(" µÚ%d»ØºÏ:\n",TurnNum);
-            if(!player2.bot)
-            player2.acttion=Choose(player2);
-			else
-			player2.acttion=Bot_choose(player2);
-			printf(" µÚ%d»ØºÏ:\n",TurnNum);
-            player1.acttion=Choose(player1);
-        }
-		if(player1.acttion==2&&player2.acttion!=2)
+		if (player1.Turn_mode)
 		{
-			Over_flag=2;
+			printf(" ï¿½ï¿½%dï¿½Øºï¿½:\n", TurnNum);
+			player1.acttion = Choose(player1);
+			printf(" ï¿½ï¿½%dï¿½Øºï¿½:\n", TurnNum);
+			if (!player2.bot)
+				player2.acttion = Choose(player2);
+			else
+				player2.acttion = Bot_choose(player2);
+		}
+		else
+		{
+			printf(" ï¿½ï¿½%dï¿½Øºï¿½:\n", TurnNum);
+			if (!player2.bot)
+				player2.acttion = Choose(player2);
+			else
+				player2.acttion = Bot_choose(player2);
+			printf(" ï¿½ï¿½%dï¿½Øºï¿½:\n", TurnNum);
+			player1.acttion = Choose(player1);
+		}
+		if (player1.acttion == 2 && player2.acttion != 2)
+		{
+			Over_flag = 2;
 			break;
 		}
-		else if(player2.acttion==2&&player1.acttion!=2)
+		else if (player2.acttion == 2 && player1.acttion != 2)
 		{
-			Over_flag=1;
+			Over_flag = 1;
 			break;
 		}
-		else if(player1.acttion==2&&player2.acttion==2)
+		else if (player1.acttion == 2 && player2.acttion == 2)
 		{
-			Over_flag=3;
+			Over_flag = 3;
 			break;
 		}
 		else
-		Settlement(player1,player2);
-        Over_flag=If_Over(player1,player2);
-		if(Over_flag!=0)
-		break;
+			Settlement(player1, player2);
+		Over_flag = If_Over(player1, player2);
+		if (Over_flag != 0)
+			break;
 		TurnNum++;
 	}
-	PlayTurn_Over(player1,player2,Over_flag);
+	PlayTurn_Over(player1, player2, Over_flag);
 }
-int StartTurn(player& player1, player& player2)//ÓÎÏ·¿ªÊ¼Ç°³éÅÆºÍ¾ö¶¨¹¥ÊØ·½
+int StartTurn(player &player1, player &player2) //ï¿½ï¿½Ï·ï¿½ï¿½Ê¼Ç°ï¿½ï¿½ï¿½ÆºÍ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½
 {
-	strcpy(player1.playername,"Íæ¼Ò1");
-	if(!player2.bot)
-	strcpy(player2.playername,"Íæ¼Ò2");
+	strcpy(player1.playername, "ï¿½ï¿½ï¿½1");
+	if (!player2.bot)
+		strcpy(player2.playername, "ï¿½ï¿½ï¿½2");
 	else
-	strcpy(player2.playername,"ÈõÖÇµçÄÔ");
+		strcpy(player2.playername, "ï¿½ï¿½ï¿½Çµï¿½ï¿½ï¿½");
 	srand(time(NULL));
 	Start_Drawing(player1);
 	Start_Drawing(player2);
-	/*{²âÊÔÓÃ³õÊ¼¿¨×éÈ·¶¨´úÂë
+	/*{ï¿½ï¿½ï¿½ï¿½ï¿½Ã³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		Card Block,Punch;
-		strcpy(Block.Name, "¸ñµ²");
-		strcpy(Block.text, "Ñ¹ÖÆ:³éÒ»ÕÅÅÆ»ò´ò³öÒ»ÕÅ¹¥»÷ÅÆ");
+		strcpy(Block.Name, "ï¿½ï¿½");
+		strcpy(Block.text, "Ñ¹ï¿½ï¿½:ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Æ»ï¿½ï¿½ï¿½Ò»ï¿½Å¹ï¿½ï¿½ï¿½ï¿½ï¿½");
 		Block.Level = 2;
 		Block.Fun[0] = 1;
 		Block.Kind = 0;
 		Block.Type = 0;
 		strcpy(Punch.Name, "È­");
-		strcpy(Punch.text, "ÎÞ");
+		strcpy(Punch.text, "ï¿½ï¿½");
 		Punch.Level = 1;
 		Punch.Kind = 0;
 		Punch.Type = 1;
@@ -234,18 +237,18 @@ int StartTurn(player& player1, player& player2)//ÓÎÏ·¿ªÊ¼Ç°³éÅÆºÍ¾ö¶¨¹¥ÊØ·½
 		player1.Turn_mode = 1;
 	else
 		player2.Turn_mode = 1;
-    if(player1.Turn_mode)
-    printf(" %s »ñµÃÏÈ¹¥!\n",player1.playername);
-    else
-    printf(" %s »ñµÃÏÈ¹¥!\n",player2.playername);
-    getchar();
+	if (player1.Turn_mode)
+		printf(" %s ï¿½ï¿½ï¿½ï¿½È¹ï¿½!\n", player1.playername);
+	else
+		printf(" %s ï¿½ï¿½ï¿½ï¿½È¹ï¿½!\n", player2.playername);
+	getchar();
 	return player1.Turn_mode;
 }
-int First_Attack_Decide()/*¾ö¶¨ÏÈ¹¥*/
+int First_Attack_Decide() /*ï¿½ï¿½ï¿½ï¿½ï¿½È¹ï¿½*/
 {
 	return rand() % 2;
 }
-int Start_Drawing(player &player)/*³õÊ¼³éÅÆ*/
+int Start_Drawing(player &player) /*ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½*/
 {
 	for (int i = 0; i < 5; i++)
 	{
@@ -253,18 +256,17 @@ int Start_Drawing(player &player)/*³õÊ¼³éÅÆ*/
 		draw_loc = rand() % player.deck_inturn.CardNum;
 		player.hand.card[player.hand.CardNum] = player.deck_inturn.card[draw_loc];
 		for (int j = draw_loc; j + 1 < player.deck_inturn.CardNum; j++)
-		player.deck_inturn.card[j] = player.deck_inturn.card[j + 1];
-		if(player.hand.card[player.hand.CardNum].Type)
-		player.hand.AttackNum++;
+			player.deck_inturn.card[j] = player.deck_inturn.card[j + 1];
+		if (player.hand.card[player.hand.CardNum].Type)
+			player.hand.AttackNum++;
 		else
-		player.hand.DefenceNum++;
+			player.hand.DefenceNum++;
 		player.deck_inturn.CardNum--;
 		player.hand.CardNum++;
-		
 	}
 	return 0;
 }
-int Drawing(player &player)/*³éÅÆ½×¶Î*/
+int Drawing(player &player) /*ï¿½ï¿½ï¿½Æ½×¶ï¿½*/
 {
 	Card drawd;
 	int draw_loc;
@@ -275,7 +277,7 @@ int Drawing(player &player)/*³éÅÆ½×¶Î*/
 	player.deck_inturn.CardNum--;
 	if (player.hand.CardNum == 5)
 	{
-		printf(" ÊÖÅÆÒÑÂú,¿¨ÅÆ %s ½øÈëÆúÅÆ¿â!\n", drawd.Name);
+		printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ %s ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¿ï¿½!\n", drawd.Name);
 		getchar();
 		getchar();
 		system("cls");
@@ -283,455 +285,457 @@ int Drawing(player &player)/*³éÅÆ½×¶Î*/
 	}
 	else
 		player.hand.card[player.hand.CardNum] = drawd;
-	if(!player.bot)
-	printf(" ³éµ½ÁË¿¨ÅÆ %s !\n", drawd.Name);
+	if (!player.bot)
+		printf(" ï¿½éµ½ï¿½Ë¿ï¿½ï¿½ï¿½ %s !\n", drawd.Name);
 	else
-	printf(" %s ÐÐ¶¯Íê³É!\n",player.playername);
-	if(drawd.Type)
-	player.hand.AttackNum++;
+		printf(" %s ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½!\n", player.playername);
+	if (drawd.Type)
+		player.hand.AttackNum++;
 	else
-	player.hand.DefenceNum++;
+		player.hand.DefenceNum++;
 	getchar();
 	getchar();
 	player.hand.CardNum++;
 	return 1;
 }
-int Choose(player &player)/*Ñ¡ÅÆ½×¶Î*/
+int Choose(player &player) /*Ñ¡ï¿½Æ½×¶ï¿½*/
 {
 	int op;
-	while(1)
+	while (1)
 	{
 		Show_Turn(player);
 		Show_HP(player);
 		Show_Hand(player);
-		if(player.hand.CardNum!=0)//¿ÉÒÔ³öÅÆ
+		if (player.hand.CardNum != 0) //ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½
 		{
-			if(player.deck_inturn.CardNum==0)//ÎÞ·¨³éÅÆ
+			if (player.deck_inturn.CardNum == 0) //ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½
 			{
-				printf(" ÇëÑ¡Ôñ³öÅÆ,Ìø¹ý»ØºÏ»òÈÏÊä\n");
-				printf(" 1.³öÅÆ 2.Ìø¹ý»ØºÏ 0.ÈÏÊä\n");
+				printf(" ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ØºÏ»ï¿½ï¿½ï¿½ï¿½ï¿½\n");
+				printf(" 1.ï¿½ï¿½ï¿½ï¿½ 2.ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½ 0.ï¿½ï¿½ï¿½ï¿½\n");
 			}
-			else//¿ÉÒÔ³éÅÆ
+			else //ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½
 			{
-				printf(" ÇëÑ¡Ôñ³öÅÆ,³éÅÆ»òÈÏÊä\n");
-				printf(" 1.³öÅÆ 2.³éÅÆ 0.ÈÏÊä\n");
+				printf(" ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½Æ»ï¿½ï¿½ï¿½ï¿½ï¿½\n");
+				printf(" 1.ï¿½ï¿½ï¿½ï¿½ 2.ï¿½ï¿½ï¿½ï¿½ 0.ï¿½ï¿½ï¿½ï¿½\n");
 			}
 			scanf("%d", &op);
 		}
-		else//ÎÞ·¨³öÅÆ
+		else //ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
-			op=2;
-			if(player.deck_inturn.CardNum==0)//ÎÞ·¨³éÅÆ
-			printf(" ÎÞ·¨³öÅÆ,×Ô¶¯Ìø¹ý»ØºÏ\n");
-			else//¿ÉÒÔ³éÅÆ
-			printf(" ÎÞ·¨³öÅÆ,×Ô¶¯³éÅÆ\n");
+			op = 2;
+			if (player.deck_inturn.CardNum == 0) //ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½
+				printf(" ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½\n");
+			else //ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½
+				printf(" ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½\n");
 		}
-		if(op==1)
+		if (op == 1)
 		{
-			int Use_flag=Use(player);
-			if(Use_flag==1)//³É¹¦Ê¹ÓÃ¿¨ÅÆ
+			int Use_flag = Use(player);
+			if (Use_flag == 1) //ï¿½É¹ï¿½Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
 			{
 				system("cls");
-				return 1;//Ê¹ÓÃ¿¨ÅÆ
+				return 1; //Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
 			}
-			else if(Use_flag==2)//ÎÞ·¨Ê¹ÓÃ¿¨ÅÆ
-			op=2;
-			else//È¡Ïû³öÅÆ
-			continue;//ÖØÐÂ¿ªÊ¼»ØºÏ
+			else if (Use_flag == 2) //ï¿½Þ·ï¿½Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
+				op = 2;
+			else		  //È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+				continue; //ï¿½ï¿½ï¿½Â¿ï¿½Ê¼ï¿½Øºï¿½
 		}
-		if(op==2)
+		if (op == 2)
 		{
-			if(player.deck_inturn.CardNum!=0)//³éÅÆ
+			if (player.deck_inturn.CardNum != 0) //ï¿½ï¿½ï¿½ï¿½
 			{
-				if(Drawing(player))
+				if (Drawing(player))
 				{
 					system("cls");
-					return 0;//³éÅÆ
+					return 0; //ï¿½ï¿½ï¿½ï¿½
 				}
 				else
 				{
 					system("cls");
-					continue;//ÖØÐÂ¿ªÊ¼»ØºÏ
+					continue; //ï¿½ï¿½ï¿½Â¿ï¿½Ê¼ï¿½Øºï¿½
 				}
 			}
-			else//Ìø¹ý
+			else //ï¿½ï¿½ï¿½ï¿½
 			{
-				printf(" ÒÑÌø¹ý¸Ã»ØºÏ!\n");
+				printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»Øºï¿½!\n");
 				getchar();
 				system("cls");
-				return -1;//Ìø¹ý»ØºÏ
+				return -1; //ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½
 			}
 		}
 		else
 		{
-			printf(" ÒÑÈÏÊä!\n");
+			printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½!\n");
 			getchar();
 			system("cls");
-			return 2;//ÈÏÊä
+			return 2; //ï¿½ï¿½ï¿½ï¿½
 		}
 	}
 }
-int Use(player&player)/*ÓÃÅÆ½×¶Î*/
+int Use(player &player) /*ï¿½ï¿½ï¿½Æ½×¶ï¿½*/
 {
 	int Card_loc;
-	if(player.Turn_mode)//½ø¹¥»ØºÏ
+	if (player.Turn_mode) //ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½
 	{
-		if(player.hand.AttackNum!=0)//ÊÖÅÆÖÐÓÐ¹¥»÷ÅÆ
+		if (player.hand.AttackNum != 0) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
-			printf(" ÇëÑ¡Ôñ¹¥»÷ÅÆ´ò³ö! 1~%d\n", player.hand.CardNum);
-			printf(" È¡ÏûÑ¡ÔñÇëÊäÈë 0\n");
-		    scanf("%d",&Card_loc);
+			printf(" ï¿½ï¿½Ñ¡ï¿½ñ¹¥»ï¿½ï¿½Æ´ï¿½ï¿½! 1~%d\n", player.hand.CardNum);
+			printf(" È¡ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0\n");
+			scanf("%d", &Card_loc);
 			if (!Card_loc)
 			{
 				getchar();
 				getchar();
 				system("cls");
-				return 0;//·ÅÆúÊ¹ÓÃ¿¨ÅÆ
+				return 0; //ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
 			}
 			else
 			{
-				player.Card_used=player.hand.card[Card_loc-1];
-				if((!player.Card_used.Type)&&(player.Turn_mode))
-                {
-                    printf(" Ñ¡ÔñµÄ·Ç¹¥»÷ÅÆ,ÇëÖØÐÂÑ¡Ôñ!");
-                    getchar();
-                    getchar();
-                    system("cls");
-                    return 0;//Ñ¡Ôñ¿¨ÅÆ´íÎó
-                }
+				player.Card_used = player.hand.card[Card_loc - 1];
+				if ((!player.Card_used.Type) && (player.Turn_mode))
+				{
+					printf(" Ñ¡ï¿½ï¿½Ä·Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½!");
+					getchar();
+					getchar();
+					system("cls");
+					return 0; //Ñ¡ï¿½ï¿½ï¿½Æ´ï¿½ï¿½ï¿½
+				}
 				for (int i = Card_loc - 1; i + 1 < player.hand.CardNum; i++)
-				player.hand.card[i] = player.hand.card[i + 1];
+					player.hand.card[i] = player.hand.card[i + 1];
 				player.hand.CardNum--;
-				printf(" ¿¨ÅÆ %s ½«»á´ò³ö!\n", player.Card_used.Name);
+				printf(" ï¿½ï¿½ï¿½ï¿½ %s ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½!\n", player.Card_used.Name);
 				player.hand.AttackNum--;
 				getchar();
 				getchar();
 				system("cls");
-				return 1;//³É¹¦Ê¹ÓÃ¿¨ÅÆ
+				return 1; //ï¿½É¹ï¿½Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
 			}
 		}
-		else//ÊÖÅÆÖÐÃ»ÓÐ¹¥»÷ÅÆ
+		else //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
-			if(player.deck_inturn.CardNum!=0)//¿ÉÒÔ³éÅÆ
+			if (player.deck_inturn.CardNum != 0) //ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½
 			{
-				printf(" ÊÖÅÆÖÐÃ»ÓÐ¹¥»÷ÅÆ,×Ô¶¯³éÅÆ!\n");
-				return 2;//³éÅÆ
+				printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½!\n");
+				return 2; //ï¿½ï¿½ï¿½ï¿½
 			}
 			else
 			{
-				printf(" ÊÖÅÆÖÐÃ»ÓÐ¹¥»÷ÅÆ,ÎÞ·¨³éÅÆ,×Ô¶¯Ìø¹ý»ØºÏ!\n");
-				return 2;//Ìø¹ý
+				printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½!\n");
+				return 2; //ï¿½ï¿½ï¿½ï¿½
 			}
 		}
 	}
-	else//·ÀÓù»ØºÏ
+	else //ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½
 	{
-		printf(" ÇëÈÎÒâÑ¡ÔñÒ»ÕÅÅÆ´ò³ö! 1~%d \n",player.hand.CardNum);
-		printf(" È¡ÏûÑ¡ÔñÇëÊäÈë 0\n");
-		scanf("%d",&Card_loc);
+		printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Æ´ï¿½ï¿½! 1~%d \n", player.hand.CardNum);
+		printf(" È¡ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0\n");
+		scanf("%d", &Card_loc);
 		if (!Card_loc)
 		{
 			getchar();
 			system("cls");
-			return 0;//·ÅÆúÊ¹ÓÃ¿¨ÅÆ
+			return 0; //ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
 		}
 		else
 		{
-			player.Card_used=player.hand.card[Card_loc-1];
+			player.Card_used = player.hand.card[Card_loc - 1];
 			for (int i = Card_loc - 1; i + 1 < player.hand.CardNum; i++)
-			player.hand.card[i] = player.hand.card[i + 1];
+				player.hand.card[i] = player.hand.card[i + 1];
 			player.hand.CardNum--;
-			printf(" ¿¨ÅÆ %s ½«»á´ò³ö!\n", player.Card_used.Name);
-			if(player.Card_used.Type)//´ò³ö¹¥»÷ÅÆ
-			player.hand.AttackNum--;
+			printf(" ï¿½ï¿½ï¿½ï¿½ %s ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½!\n", player.Card_used.Name);
+			if (player.Card_used.Type) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+				player.hand.AttackNum--;
 			else
-			player.hand.DefenceNum--;
+				player.hand.DefenceNum--;
 			getchar();
 			system("cls");
-			return 1;//³É¹¦Ê¹ÓÃ¿¨ÅÆ
+			return 1; //ï¿½É¹ï¿½Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
 		}
 	}
 }
-void Show_Turn(player player)//ÏÔÊ¾»ØºÏÄ£Ê½
+void Show_Turn(player player) //ï¿½ï¿½Ê¾ï¿½Øºï¿½Ä£Ê½
 {
-	printf("\nµ±Ç°Îª %s µÄ",player.playername);
-	if(player.Turn_mode)
-	printf(" ½ø¹¥»ØºÏ\n");
+	printf("\nï¿½ï¿½Ç°Îª %s ï¿½ï¿½", player.playername);
+	if (player.Turn_mode)
+		printf(" ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½\n");
 	else
-	printf(" ·ÀÓù»ØºÏ\n");
+		printf(" ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½\n");
 }
-void Show_HP(player player)//ÏÔÊ¾ÑªÁ¿
+void Show_HP(player player) //ï¿½ï¿½Ê¾Ñªï¿½ï¿½
 {
-	printf(" µ±Ç°ÑªÁ¿: ");
+	printf(" ï¿½ï¿½Ç°Ñªï¿½ï¿½: ");
 	for (int i = 0; i < 10; i++)
 	{
 		if (i < player.HP)
-			printf("¡ö");
+			printf("ï¿½ï¿½");
 		else
-			printf("¡õ");
+			printf("ï¿½ï¿½");
 	}
-	printf(" ¹²%dµã\n", player.HP);
+	printf(" ï¿½ï¿½%dï¿½ï¿½\n", player.HP);
 }
-void Show_Hand(player player)//ÏÔÊ¾ÊÖÅÆ
+void Show_Hand(player player) //ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
 {
-	printf(" µ±Ç°ÊÖÅÆ: ");
-	printf("         ÅÆ¿âÊ£Óà¿¨ÅÆ: %d \n",player.deck_inturn.CardNum);
-	if(player.hand.CardNum==0)
+	printf(" ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½: ");
+	printf("         ï¿½Æ¿ï¿½Ê£ï¿½à¿¨ï¿½ï¿½: %d \n", player.deck_inturn.CardNum);
+	if (player.hand.CardNum == 0)
 	{
-		printf(" ÎÞ \n");
+		printf(" ï¿½ï¿½ \n");
 		return;
 	}
 	for (int i = 0; i < player.hand.CardNum; i++)
 		printf(" %d.%s ", i + 1, player.hand.card[i].Name);
 	printf("\n");
 }
-int Settlement(player& player1,player& player2)/*½áËã½×¶Î*/
+int Settlement(player &player1, player &player2) /*ï¿½ï¿½ï¿½ï¿½×¶ï¿½*/
 {
-    Level_calculate(player1);
-    Level_calculate(player2);
-	Card_damage(player1,player2);
-	Card_function(player1,player2);//´Ë´¦Îª¿¨ÅÆÐ§¹û·¢¶¯º¯Êý to be done
-    return 0;
+	Level_calculate(player1);
+	Level_calculate(player2);
+	Card_damage(player1, player2);
+	Card_function(player1, player2); //ï¿½Ë´ï¿½Îªï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ to be done
+	return 0;
 }
-void Level_calculate(player &player)//¼ÆËã¿¨ÅÆµÈ¼¶
+void Level_calculate(player &player) //ï¿½ï¿½ï¿½ã¿¨ï¿½ÆµÈ¼ï¿½
 {
-    if(player.Card_level_plus)
-	{ 
+	if (player.Card_level_plus)
+	{
 		player.Card_used.Level++;
-		player.Card_level_plus=0;
+		player.Card_level_plus = 0;
 	}
-    if(player.Attack_level_plus&&player.Card_used.Type)
-    {
+	if (player.Attack_level_plus && player.Card_used.Type)
+	{
 		player.Card_used.Level++;
-		player.Attack_level_plus=0;
+		player.Attack_level_plus = 0;
 	}
-    if(player.Defence_level_plus&&(!player.Card_used.Type))
-    {
+	if (player.Defence_level_plus && (!player.Card_used.Type))
+	{
 		player.Card_used.Level++;
-		player.Defence_level_plus=0;
+		player.Defence_level_plus = 0;
 	}
 }
-void Card_damage(player& player1,player& player2)//¼ÆËã¿¨ÅÆµÈ¼¶Ôì³ÉµÄÉËº¦
+void Card_damage(player &player1, player &player2) //ï¿½ï¿½ï¿½ã¿¨ï¿½ÆµÈ¼ï¿½ï¿½ï¿½Éµï¿½ï¿½Ëºï¿½
 {
 	int damage;
-	if(player1.Turn_mode)
-    {
-        printf(" ½ø¹¥·½ Íæ¼Ò1 Ñ¡Ôñ ");
-        if(player1.acttion==1)
-        printf("³öÅÆ\n Íæ¼Ò1 ´ò³öµÄÅÆÊÇ:%2s  ¿¨ÅÆµÈ¼¶:%d  ¿¨ÅÆÐ§¹û:%s\n\n",player1.Card_used.Name,player1.Card_used.Level,player1.Card_used.text);
-        else if(player1.acttion==0)
-        printf("³éÅÆ\n\n");
-		else 
-		printf("Ìø¹ý»ØºÏ\n");
-        printf(" ·ÀÓù·½ Íæ¼Ò2 Ñ¡Ôñ ");
-        if(player2.acttion==1)
-        printf("³öÅÆ\n Íæ¼Ò2 ´ò³öµÄÅÆÊÇ:%2s  ¿¨ÅÆµÈ¼¶:%d  ¿¨ÅÆÐ§¹û:%s\n\n",player2.Card_used.Name,player2.Card_used.Level,player2.Card_used.text);
-        else if(player2.acttion==0)
-        printf("³éÅÆ\n\n");
-		else 
-		printf("Ìø¹ý»ØºÏ\n");
-        printf(" ½áËã½á¹û:");
-        if(player1.acttion==1&&player2.acttion==1&&(player1.Card_used.Level>player2.Card_used.Level))
-        {
-            damage=player1.Card_used.Level-player2.Card_used.Level;
-            player2.HP-=damage;
-            printf(" Íæ¼Ò1 ¶Ô Íæ¼Ò2 Ôì³ÉÁË %d µãÉËº¦!\n",damage);
-        }
-		else if(player1.acttion==1&&player2.acttion!=1)
+	if (player1.Turn_mode)
+	{
+		printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½1 Ñ¡ï¿½ï¿½ ");
+		if (player1.acttion == 1)
+			printf("ï¿½ï¿½ï¿½ï¿½\n ï¿½ï¿½ï¿½1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:%2s  ï¿½ï¿½ï¿½ÆµÈ¼ï¿½:%d  ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½:%s\n\n", player1.Card_used.Name, player1.Card_used.Level, player1.Card_used.text);
+		else if (player1.acttion == 0)
+			printf("ï¿½ï¿½ï¿½ï¿½\n\n");
+		else
+			printf("ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½\n");
+		printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½2 Ñ¡ï¿½ï¿½ ");
+		if (player2.acttion == 1)
+			printf("ï¿½ï¿½ï¿½ï¿½\n ï¿½ï¿½ï¿½2 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:%2s  ï¿½ï¿½ï¿½ÆµÈ¼ï¿½:%d  ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½:%s\n\n", player2.Card_used.Name, player2.Card_used.Level, player2.Card_used.text);
+		else if (player2.acttion == 0)
+			printf("ï¿½ï¿½ï¿½ï¿½\n\n");
+		else
+			printf("ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½\n");
+		printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:");
+		if (player1.acttion == 1 && player2.acttion == 1 && (player1.Card_used.Level > player2.Card_used.Level))
 		{
-			damage=player1.Card_used.Level;
-			player2.HP-=damage;
-			printf(" Íæ¼Ò1 ¶Ô Íæ¼Ò2 Ôì³ÉÁË %d µãÉËº¦!\n",damage);
+			damage = player1.Card_used.Level - player2.Card_used.Level;
+			player2.HP -= damage;
+			printf(" ï¿½ï¿½ï¿½1 ï¿½ï¿½ ï¿½ï¿½ï¿½2 ï¿½ï¿½ï¿½ï¿½ï¿½ %d ï¿½ï¿½ï¿½Ëºï¿½!\n", damage);
 		}
-        else if(player1.acttion!=1||player1.Card_used.Level<player2.Card_used.Level)
-        {
-            player1.Turn_mode=0;
-            player2.Turn_mode=1;
-            printf(" ¹¥ÊØ½»»»!");
-        }
-		else printf(" ÎÞÊÂ·¢Éú");
+		else if (player1.acttion == 1 && player2.acttion != 1)
+		{
+			damage = player1.Card_used.Level;
+			player2.HP -= damage;
+			printf(" ï¿½ï¿½ï¿½1 ï¿½ï¿½ ï¿½ï¿½ï¿½2 ï¿½ï¿½ï¿½ï¿½ï¿½ %d ï¿½ï¿½ï¿½Ëºï¿½!\n", damage);
+		}
+		else if (player1.acttion != 1 || player1.Card_used.Level < player2.Card_used.Level)
+		{
+			player1.Turn_mode = 0;
+			player2.Turn_mode = 1;
+			printf(" ï¿½ï¿½ï¿½Ø½ï¿½ï¿½ï¿½!");
+		}
+		else
+			printf(" ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½");
 		getchar();
 		system("cls");
-    }
-    else
-    {
-        printf(" ½ø¹¥·½ Íæ¼Ò2 Ñ¡Ôñ ");
-        if(player2.acttion==1)
-        printf("³öÅÆ\n Íæ¼Ò2 ´ò³öµÄÅÆÊÇ %4s  ¿¨ÅÆµÈ¼¶ %d  ¿¨ÅÆÐ§¹û %s\n",player2.Card_used.Name,player2.Card_used.Level,player2.Card_used.text);
-        else if(player2.acttion==0)
-        printf("³éÅÆ\n\n");
-		else 
-		printf("Ìø¹ý»ØºÏ\n");
-        printf(" ·ÀÓù·½ Íæ¼Ò1 Ñ¡Ôñ ");
-        if(player1.acttion==1)
-        printf("³öÅÆ\n Íæ¼Ò1 ´ò³öµÄÅÆÊÇ %4s  ¿¨ÅÆµÈ¼¶ %d  ¿¨ÅÆÐ§¹û %s\n",player1.Card_used.Name,player1.Card_used.Level,player1.Card_used.text);
-        else if(player1.acttion==0)
-        printf("³éÅÆ\n\n");
-		else 
-		printf("Ìø¹ý»ØºÏ\n");
-		printf(" ½áËã½á¹û:");
-        if(player1.acttion==1&&player2.acttion==1&&(player2.Card_used.Level>player1.Card_used.Level))
-        {
-            damage=player2.Card_used.Level-player1.Card_used.Level;
-            player1.HP-=damage;
-            printf(" Íæ¼Ò2 ¶Ô Íæ¼Ò1 Ôì³ÉÁË %d µãÉËº¦!\n",damage);
-        }
-		else if(player2.acttion==1&&player1.acttion!=1)
+	}
+	else
+	{
+		printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½2 Ñ¡ï¿½ï¿½ ");
+		if (player2.acttion == 1)
+			printf("ï¿½ï¿½ï¿½ï¿½\n ï¿½ï¿½ï¿½2 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ %4s  ï¿½ï¿½ï¿½ÆµÈ¼ï¿½ %d  ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ %s\n", player2.Card_used.Name, player2.Card_used.Level, player2.Card_used.text);
+		else if (player2.acttion == 0)
+			printf("ï¿½ï¿½ï¿½ï¿½\n\n");
+		else
+			printf("ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½\n");
+		printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½1 Ñ¡ï¿½ï¿½ ");
+		if (player1.acttion == 1)
+			printf("ï¿½ï¿½ï¿½ï¿½\n ï¿½ï¿½ï¿½1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ %4s  ï¿½ï¿½ï¿½ÆµÈ¼ï¿½ %d  ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ %s\n", player1.Card_used.Name, player1.Card_used.Level, player1.Card_used.text);
+		else if (player1.acttion == 0)
+			printf("ï¿½ï¿½ï¿½ï¿½\n\n");
+		else
+			printf("ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½\n");
+		printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:");
+		if (player1.acttion == 1 && player2.acttion == 1 && (player2.Card_used.Level > player1.Card_used.Level))
 		{
-			damage=player2.Card_used.Level;
-			player1.HP-=damage;
-			printf(" Íæ¼Ò2 ¶Ô Íæ¼Ò1 Ôì³ÉÁË %d µãÉËº¦!\n",damage);
+			damage = player2.Card_used.Level - player1.Card_used.Level;
+			player1.HP -= damage;
+			printf(" ï¿½ï¿½ï¿½2 ï¿½ï¿½ ï¿½ï¿½ï¿½1 ï¿½ï¿½ï¿½ï¿½ï¿½ %d ï¿½ï¿½ï¿½Ëºï¿½!\n", damage);
 		}
-		else if(player2.acttion!=1||player2.Card_used.Level<player1.Card_used.Level)
-        {
-            player2.Turn_mode=0;
-            player1.Turn_mode=1;
-            printf(" ¹¥ÊØ½»»»!");
-        }
-		else printf(" ÎÞÊÂ·¢Éú");
+		else if (player2.acttion == 1 && player1.acttion != 1)
+		{
+			damage = player2.Card_used.Level;
+			player1.HP -= damage;
+			printf(" ï¿½ï¿½ï¿½2 ï¿½ï¿½ ï¿½ï¿½ï¿½1 ï¿½ï¿½ï¿½ï¿½ï¿½ %d ï¿½ï¿½ï¿½Ëºï¿½!\n", damage);
+		}
+		else if (player2.acttion != 1 || player2.Card_used.Level < player1.Card_used.Level)
+		{
+			player2.Turn_mode = 0;
+			player1.Turn_mode = 1;
+			printf(" ï¿½ï¿½ï¿½Ø½ï¿½ï¿½ï¿½!");
+		}
+		else
+			printf(" ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½");
 		getchar();
 		system("cls");
-    }
-}
-int If_Over(player player1,player player2)//ÅÐ¶ÏÓÎÏ·ÊÇ·ñ½áÊø.
-{
-	if(player1.acttion==2&&player2.acttion!=2)
-	return 2;//Íæ¼Ò2Ê¤Àû
-	else if(player2.acttion==2&&player1.acttion!=2)
-	return 1;//Íæ¼Ò1Ê¤Àû
-	else if(player1.acttion==2&&player2.acttion==2)
-	return 3;//Æ½¾Ö
-	if((player1.hand.CardNum==0)&&(player2.hand.CardNum==0)&&(player2.deck_inturn.CardNum==0)&&(player1.deck_inturn.CardNum==0))
-	{
-		if(player1.HP>player2.HP)
-		return 1;//Íæ¼Ò1Ê¤Àû
-		else if(player2.HP>player1.HP)
-		return 2;//Íæ¼Ò2Ê¤Àû
-		else
-		return 3;//Æ½¾Ö
 	}
-	return 0;//ÓÎÏ·Î´½áÊø
 }
-void PlayTurn_Over(player player1, player player2, int flag)//ÓÎÏ·»ØºÏ½áÊø
+int If_Over(player player1, player player2) //ï¿½Ð¶ï¿½ï¿½ï¿½Ï·ï¿½Ç·ï¿½ï¿½ï¿½ï¿½.
 {
-	if(flag==1)
+	if (player1.acttion == 2 && player2.acttion != 2)
+		return 2; //ï¿½ï¿½ï¿½2Ê¤ï¿½ï¿½
+	else if (player2.acttion == 2 && player1.acttion != 2)
+		return 1; //ï¿½ï¿½ï¿½1Ê¤ï¿½ï¿½
+	else if (player1.acttion == 2 && player2.acttion == 2)
+		return 3; //Æ½ï¿½ï¿½
+	if ((player1.hand.CardNum == 0) && (player2.hand.CardNum == 0) && (player2.deck_inturn.CardNum == 0) && (player1.deck_inturn.CardNum == 0))
 	{
-		if(player2.acttion==2)
-		printf(" \nÍæ¼Ò2 ÈÏÊä, Íæ¼Ò1 »ñÊ¤!\n");
+		if (player1.HP > player2.HP)
+			return 1; //ï¿½ï¿½ï¿½1Ê¤ï¿½ï¿½
+		else if (player2.HP > player1.HP)
+			return 2; //ï¿½ï¿½ï¿½2Ê¤ï¿½ï¿½
+		else
+			return 3; //Æ½ï¿½ï¿½
+	}
+	return 0; //ï¿½ï¿½Ï·Î´ï¿½ï¿½ï¿½ï¿½
+}
+void PlayTurn_Over(player player1, player player2, int flag) //ï¿½ï¿½Ï·ï¿½ØºÏ½ï¿½ï¿½ï¿½
+{
+	if (flag == 1)
+	{
+		if (player2.acttion == 2)
+			printf(" \nï¿½ï¿½ï¿½2 ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½1 ï¿½ï¿½Ê¤!\n");
 		else
 		{
-			printf(" \nÍæ¼Ò1 Ê£ÓàÌåÁ¦: %d  \nÍæ¼Ò2 Ê£ÓàÌåÁ¦: %d \n",player1.HP,player2.HP);
-			printf(" \nÍæ¼Ò2 ±»»÷°Ü, Íæ¼Ò1 »ñÊ¤\n");
+			printf(" \nï¿½ï¿½ï¿½1 Ê£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: %d  \nï¿½ï¿½ï¿½2 Ê£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: %d \n", player1.HP, player2.HP);
+			printf(" \nï¿½ï¿½ï¿½2 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½1 ï¿½ï¿½Ê¤\n");
 		}
 	}
-	else if(flag==2)
+	else if (flag == 2)
 	{
-		if(player1.acttion==2)
-		printf(" \nÍæ¼Ò1 ÈÏÊä, Íæ¼Ò2 »ñÊ¤!\n");
+		if (player1.acttion == 2)
+			printf(" \nï¿½ï¿½ï¿½1 ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½2 ï¿½ï¿½Ê¤!\n");
 		else
 		{
-			printf(" \nÍæ¼Ò1 Ê£ÓàÌåÁ¦: %d  \nÍæ¼Ò2 Ê£ÓàÌåÁ¦: %d \n",player1.HP,player2.HP);
-			printf(" \nÍæ¼Ò2 ±»»÷°Ü, Íæ¼Ò1 »ñÊ¤\n");
+			printf(" \nï¿½ï¿½ï¿½1 Ê£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: %d  \nï¿½ï¿½ï¿½2 Ê£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: %d \n", player1.HP, player2.HP);
+			printf(" \nï¿½ï¿½ï¿½2 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½1 ï¿½ï¿½Ê¤\n");
 		}
 	}
 	else
 	{
-		if(player1.acttion==2)
-		printf(" \nË«·½Í¬Ê±ÈÏÊä,Æ½¾Ö!\n");
+		if (player1.acttion == 2)
+			printf(" \nË«ï¿½ï¿½Í¬Ê±ï¿½ï¿½ï¿½ï¿½,Æ½ï¿½ï¿½!\n");
 		else
-		printf(" \nË«·½Ê£ÓàÌåÁ¦ÏàµÈ,Æ½¾Ö!\n");
+			printf(" \nË«ï¿½ï¿½Ê£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Æ½ï¿½ï¿½!\n");
 	}
 	getchar();
 	system("cls");
-	return ;
+	return;
 }
-void Card_function(player &player1,player &player2)//¿¨ÅÆÐ§¹û´¥·¢º¯Êý
+void Card_function(player &player1, player &player2) //ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 {
-	if(player1.acttion==1&&player2.acttion==1)//Ë«·½¶¼³öÅÆ
+	if (player1.acttion == 1 && player2.acttion == 1) //Ë«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	{
-		//Íæ¼Ò1Ê¹ÓÃµÄ¿¨ÅÆÐ§¹ûÅÐ¶Ï--------------------------------------------
-		if(player1.Card_used.Fun[0])
+		//ï¿½ï¿½ï¿½1Ê¹ï¿½ÃµÄ¿ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Ð¶ï¿½--------------------------------------------
+		if (player1.Card_used.Fun[0])
 		{
-			if(player1.Card_used.Level>player2.Card_used.Level)
-			Fun_0_yazhi(player1,player2);
+			if (player1.Card_used.Level > player2.Card_used.Level)
+				Fun_0_yazhi(player1, player2);
 		}
 
-		//Íæ¼Ò2Ê¹ÓÃµÄ¿¨ÅÆÐ§¹ûÅÐ¶Ï--------------------------------------------
-		if(player2.Card_used.Fun[0])
+		//ï¿½ï¿½ï¿½2Ê¹ï¿½ÃµÄ¿ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Ð¶ï¿½--------------------------------------------
+		if (player2.Card_used.Fun[0])
 		{
-			if(player2.Card_used.Level>player1.Card_used.Level)
-			Fun_0_yazhi(player2,player1);
+			if (player2.Card_used.Level > player1.Card_used.Level)
+				Fun_0_yazhi(player2, player1);
 		}
-		return ;
+		return;
 	}
-	else//¹¥ÐÄ
-	;
+	else //ï¿½ï¿½ï¿½ï¿½
+		;
 }
-int Fun_0_yazhi(player &player1,player &player2)//ËùÓÐÑ¹ÖÆÐ§¹û´¥·¢º¯Êý
+int Fun_0_yazhi(player &player1, player &player2) //ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 {
-	if(!strcmp(player1.Card_used.Name,"¸ñµ²"))// ¸ñµ² µÄÐ§¹û
-	Ge_Dang(player1,player2);
+	if (!strcmp(player1.Card_used.Name, "ï¿½ï¿½")) // ï¿½ï¿½ ï¿½ï¿½Ð§ï¿½ï¿½
+		Ge_Dang(player1, player2);
 	return 0;
 }
-/*------------------------------¿¨ÅÆÐ§¹ûº¯Êý----------------------------------------*/
-void Ge_Dang(player &player1,player &player2)
+/*------------------------------ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½----------------------------------------*/
+void Ge_Dang(player &player1, player &player2)
 {
-	int op,Card_loc;
-	while(1)
+	int op, Card_loc;
+	while (1)
 	{
-		printf(" \n%s µÄ¿¨ÅÆ ¸ñµ² Ð§¹û´¥·¢\n",player1.playername);
-		if(!player1.bot)
-		printf(" ÇëÑ¡Ôñ³éÒ»ÕÅÅÆ»òÕß´ò³öÒ»ÕÅ¹¥»÷ÅÆ!\n");
+		printf(" \n%s ï¿½Ä¿ï¿½ï¿½ï¿½ ï¿½ï¿½ Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n", player1.playername);
+		if (!player1.bot)
+			printf(" ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Æ»ï¿½ï¿½ß´ï¿½ï¿½Ò»ï¿½Å¹ï¿½ï¿½ï¿½ï¿½ï¿½!\n");
 		Show_HP(player1);
-		if(!player1.bot)
-		Show_Hand(player1);
-		if(!player1.bot)//ÈËÀàÍæ¼Ò
+		if (!player1.bot)
+			Show_Hand(player1);
+		if (!player1.bot) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
-			printf(" 1.´ò³öÒ»ÕÅ¹¥»÷ÅÆ 2.³éÒ»ÕÅÅÆ\n");
-			scanf("%d",&op);
+			printf(" 1.ï¿½ï¿½ï¿½Ò»ï¿½Å¹ï¿½ï¿½ï¿½ï¿½ï¿½ 2.ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½\n");
+			scanf("%d", &op);
 		}
-		else//µçÄÔÍæ¼Ò
+		else //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
-			if(player1.hand.AttackNum!=0)//ÓÐ¹¥»÷ÅÆ
+			if (player1.hand.AttackNum != 0) //ï¿½Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½
 			{
-				if(player1.deck_inturn.CardNum!=0)//¿ÉÒÔ³éÅÆ
-				op=rand()%2+1;
-				else//²»ÄÜ³éÅÆ
-				op=1;
+				if (player1.deck_inturn.CardNum != 0) //ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½
+					op = rand() % 2 + 1;
+				else //ï¿½ï¿½ï¿½Ü³ï¿½ï¿½ï¿½
+					op = 1;
 			}
-			else//ÎÞ¹¥»÷ÅÆ
-			op=2;
+			else //ï¿½Þ¹ï¿½ï¿½ï¿½ï¿½ï¿½
+				op = 2;
 		}
-		if(op==2)
+		if (op == 2)
 		{
-			if(player1.deck_inturn.CardNum!=0)//¿ÉÒÔ³éÅÆ
+			if (player1.deck_inturn.CardNum != 0) //ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½
 			{
 				Drawing(player1);
 				break;
 			}
-			else//ÎÞ·¨³éÅÆ
+			else //ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½
 			{
-				printf(" ÎÞ·¨³éÅÆ,×Ô¶¯Ìø¹ý»ØºÏ\n");
+				printf(" ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½\n");
 				break;
 			}
 		}
 		else
 		{
-			if(player1.hand.CardNum!=0)	
-			{	
-				if(!player1.bot)
+			if (player1.hand.CardNum != 0)
+			{
+				if (!player1.bot)
 				{
-					printf(" ÇëÑ¡Ôñ³öÅÆ»òÌø¹ý³öÅÆ\n");
-					printf(" 1.³öÅÆ 2.Ìø¹ý³öÅÆ\n");
+					printf(" ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½Æ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n");
+					printf(" 1.ï¿½ï¿½ï¿½ï¿½ 2.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n");
 					scanf("%d", &op);
 				}
 				else
-				op=1;
-				if(op==1)
+					op = 1;
+				if (op == 1)
 				{
-					if(!player1.bot)
+					if (!player1.bot)
 					{
-						printf(" ÇëÑ¡ÔñÄãÒª³öµÄÅÆ 1~%d\n", player1.hand.CardNum);
+						printf(" ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1~%d\n", player1.hand.CardNum);
 						scanf("%d", &Card_loc);
 						player1.Card_used = player1.hand.card[Card_loc - 1];
 					}
@@ -739,30 +743,30 @@ void Ge_Dang(player &player1,player &player2)
 					{
 						do
 						{
-							Card_loc=rand()%player1.hand.CardNum;
-						} while (!player1.hand.card[Card_loc].Type);//Ñ¡Ôñ¹¥»÷ÅÆ´ò³ö
+							Card_loc = rand() % player1.hand.CardNum;
+						} while (!player1.hand.card[Card_loc].Type); //Ñ¡ï¿½ñ¹¥»ï¿½ï¿½Æ´ï¿½ï¿½
 						player1.Card_used = player1.hand.card[Card_loc];
 					}
-					if(!player1.Card_used.Type)
+					if (!player1.Card_used.Type)
 					{
-						printf(" Ñ¡ÔñµÄ·Ç¹¥»÷ÅÆ,ÇëÖØÐÂÑ¡Ôñ!");
+						printf(" Ñ¡ï¿½ï¿½Ä·Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½!");
 						getchar();
 						system("cls");
 						continue;
 					}
 					for (int i = Card_loc - 1; i + 1 < player1.hand.CardNum; i++)
-					player1.hand.card[i] = player1.hand.card[i + 1];
+						player1.hand.card[i] = player1.hand.card[i + 1];
 					player1.hand.CardNum--;
 					Level_calculate(player1);
-					int damage=player1.Card_used.Level;
-					player2.HP-=damage;
-					printf(" %s ´ò³ö %s, ¶Ô %s Ôì³ÉÁË %d µãÉËº¦!\n",player1.playername,player1.Card_used.Name,player2.playername,damage);
+					int damage = player1.Card_used.Level;
+					player2.HP -= damage;
+					printf(" %s ï¿½ï¿½ï¿½ %s, ï¿½ï¿½ %s ï¿½ï¿½ï¿½ï¿½ï¿½ %d ï¿½ï¿½ï¿½Ëºï¿½!\n", player1.playername, player1.Card_used.Name, player2.playername, damage);
 					break;
 				}
 			}
 			else
 			{
-				printf(" ÎÞÅÆ¿É³ö,×Ô¶¯Ìø¹ý\n");
+				printf(" ï¿½ï¿½ï¿½Æ¿É³ï¿½,ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½\n");
 				break;
 			}
 		}
@@ -772,68 +776,68 @@ void Ge_Dang(player &player1,player &player2)
 	system("cls");
 	return;
 }
-/*------------------------------»úÆ÷ÈËº¯Êý------------------------------------------*/
+/*------------------------------ï¿½ï¿½ï¿½ï¿½ï¿½Ëºï¿½ï¿½ï¿½------------------------------------------*/
 int Bot_choose(player &player)
 {
 	int op;
-	while(1)
+	while (1)
 	{
 		Show_Turn(player);
 		Show_HP(player);
 		//Show_Hand(player);
-		if(player.hand.CardNum!=0)//¿ÉÒÔ³öÅÆ
+		if (player.hand.CardNum != 0) //ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½
 		{
-			if(player.deck_inturn.CardNum==0)//ÎÞ·¨³éÅÆ
-			op=1;//³öÅÆ
-			else//¿ÉÒÔ³éÅÆ
+			if (player.deck_inturn.CardNum == 0) //ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½
+				op = 1;							 //ï¿½ï¿½ï¿½ï¿½
+			else								 //ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½
 			{
-				if(player.hand.CardNum<5)//ÊÖÅÆÎ´Âú
-				op=rand()%2+1;//Ëæ»ú³öÅÆ»ò³éÅÆ
+				if (player.hand.CardNum < 5) //ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½
+					op = rand() % 2 + 1;	 //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ»ï¿½ï¿½ï¿½ï¿½
 				else
-				op=1;//³öÅÆ
+					op = 1; //ï¿½ï¿½ï¿½ï¿½
 			}
 		}
-		else//ÎÞ·¨³öÅÆ
+		else //ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
-			if(player.deck_inturn.CardNum==0)//ÎÞ·¨³éÅÆ
-			printf(" ÎÞ·¨³öÅÆ,×Ô¶¯Ìø¹ý»ØºÏ\n");
-			else//¿ÉÒÔ³éÅÆ
-			printf(" ÎÞ·¨³öÅÆ,×Ô¶¯³éÅÆ\n");
-			op=2;
+			if (player.deck_inturn.CardNum == 0) //ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½
+				printf(" ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½\n");
+			else //ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½
+				printf(" ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½\n");
+			op = 2;
 		}
-		if(op==1)
+		if (op == 1)
 		{
-			int Use_flag=Bot_Use(player);
-			if(Use_flag==1)//³É¹¦Ê¹ÓÃ¿¨ÅÆ
-				return 1;//Ê¹ÓÃ¿¨ÅÆ
-			else if(Use_flag==2)//ÎÞ·¨Ê¹ÓÃ¿¨ÅÆ
-			op=2;
-			else//È¡Ïû³öÅÆ
-			continue;//ÖØÐÂÑ¡Ôñ
+			int Use_flag = Bot_Use(player);
+			if (Use_flag == 1)		//ï¿½É¹ï¿½Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
+				return 1;			//Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
+			else if (Use_flag == 2) //ï¿½Þ·ï¿½Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
+				op = 2;
+			else		  //È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+				continue; //ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
 		}
-		if(op==2)
+		if (op == 2)
 		{
-			if(player.deck_inturn.CardNum!=0)//³éÅÆ
+			if (player.deck_inturn.CardNum != 0) //ï¿½ï¿½ï¿½ï¿½
 			{
-				if(Bot_Draw(player))
+				if (Bot_Draw(player))
 				{
 					getchar();
 					system("cls");
-					return 0;//³éÅÆ
+					return 0; //ï¿½ï¿½ï¿½ï¿½
 				}
 				else
 				{
 					getchar();
 					system("cls");
-					continue;//ÖØÐÂ¿ªÊ¼»ØºÏ
+					continue; //ï¿½ï¿½ï¿½Â¿ï¿½Ê¼ï¿½Øºï¿½
 				}
 			}
-			else//Ìø¹ý
+			else //ï¿½ï¿½ï¿½ï¿½
 			{
-				printf(" %s ÐÐ¶¯Íê³É!\n",player.playername);	
+				printf(" %s ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½!\n", player.playername);
 				getchar();
 				system("cls");
-				return -1;//Ìø¹ý»ØºÏ
+				return -1; //ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½
 			}
 		}
 	}
@@ -849,17 +853,17 @@ int Bot_Draw(player &player)
 	player.deck_inturn.CardNum--;
 	if (player.hand.CardNum == 5)
 	{
-		printf(" ÊÖÅÆÒÑÂú,¿¨ÅÆ %s ½øÈëÆúÅÆ¿â!\n", drawd.Name);
+		printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ %s ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¿ï¿½!\n", drawd.Name);
 		system("cls");
 		return -1;
 	}
 	else
 		player.hand.card[player.hand.CardNum] = drawd;
-	printf(" %s ÐÐ¶¯Íê³É!\n", player.playername);
-	if(drawd.Type)
-	player.hand.AttackNum++;
+	printf(" %s ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½!\n", player.playername);
+	if (drawd.Type)
+		player.hand.AttackNum++;
 	else
-	player.hand.DefenceNum++;
+		player.hand.DefenceNum++;
 	player.hand.CardNum++;
 	getchar();
 	return 1;
@@ -867,62 +871,62 @@ int Bot_Draw(player &player)
 int Bot_Use(player &player)
 {
 	int Card_loc;
-	if(player.Turn_mode)//½ø¹¥»ØºÏ
+	if (player.Turn_mode) //ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½
 	{
-		if(player.hand.AttackNum!=0)//ÊÖÅÆÖÐÓÐ¹¥»÷ÅÆ
+		if (player.hand.AttackNum != 0) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
 			do
 			{
-				Card_loc=rand()%player.hand.CardNum;
-			} while (!player.hand.card[Card_loc].Type);//Ñ¡Ôñ¹¥»÷ÅÆ´ò³ö
-			player.Card_used=player.hand.card[Card_loc];
+				Card_loc = rand() % player.hand.CardNum;
+			} while (!player.hand.card[Card_loc].Type); //Ñ¡ï¿½ñ¹¥»ï¿½ï¿½Æ´ï¿½ï¿½
+			player.Card_used = player.hand.card[Card_loc];
 			for (int i = Card_loc - 1; i + 1 < player.hand.CardNum; i++)
-			player.hand.card[i] = player.hand.card[i + 1];
+				player.hand.card[i] = player.hand.card[i + 1];
 			player.hand.CardNum--;
-			printf(" %s ÐÐ¶¯Íê³É!\n", player.playername);
+			printf(" %s ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½!\n", player.playername);
 			player.hand.AttackNum--;
 			getchar();
 			system("cls");
-			return 1;//³É¹¦Ê¹ÓÃ¿¨ÅÆ
+			return 1; //ï¿½É¹ï¿½Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
 		}
-		else//ÊÖÅÆÖÐÃ»ÓÐ¹¥»÷ÅÆ
+		else //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
-			if(player.deck_inturn.CardNum!=0)//¿ÉÒÔ³éÅÆ
+			if (player.deck_inturn.CardNum != 0) //ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½
 			{
-				printf(" %s  ÐÐ¶¯Íê³É!\n", player.playername);
+				printf(" %s  ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½!\n", player.playername);
 				getchar();
-				return 2;//³éÅÆ
+				return 2; //ï¿½ï¿½ï¿½ï¿½
 			}
 			else
 			{
-				printf(" %s  ÐÐ¶¯Íê³É!\n", player.playername);
+				printf(" %s  ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½!\n", player.playername);
 				getchar();
-				return 2;//Ìø¹ý
+				return 2; //ï¿½ï¿½ï¿½ï¿½
 			}
 		}
 	}
-	else//·ÀÓù»ØºÏ
+	else //ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½
 	{
-		if(player.hand.DefenceNum!=0)//ÓÐ·ÀÓùÅÆ
+		if (player.hand.DefenceNum != 0) //ï¿½Ð·ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
 			do
 			{
-				Card_loc=rand()%player.hand.CardNum;
-			} while (player.hand.card[Card_loc].Type);//ÓÅÏÈÑ¡Ôñ·ÀÓùÅÆ´ò³ö
+				Card_loc = rand() % player.hand.CardNum;
+			} while (player.hand.card[Card_loc].Type); //ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ´ï¿½ï¿½
 		}
-		else//ÎÞ·ÀÓùÅÆ
-		Card_loc=rand()%player.hand.CardNum;//Ëæ»ú³ö¿¨;
-		player.Card_used=player.hand.card[Card_loc];
-		for (int i = Card_loc; i< player.hand.CardNum; i++)
-		player.hand.card[i] = player.hand.card[i + 1];
+		else										 //ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½
+			Card_loc = rand() % player.hand.CardNum; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½;
+		player.Card_used = player.hand.card[Card_loc];
 		player.hand.CardNum--;
-		printf(" %s  ÐÐ¶¯Íê³É!\n", player.playername);
-		if(player.Card_used.Type)//´ò³ö¹¥»÷ÅÆ
-		player.hand.AttackNum--;
+		for (int i = Card_loc; i < player.hand.CardNum; i++)
+			player.hand.card[i] = player.hand.card[i + 1];
+		printf(" %s  ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½!\n", player.playername);
+		if (player.Card_used.Type) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			player.hand.AttackNum--;
 		else
-		player.hand.DefenceNum--;
+			player.hand.DefenceNum--;
 		getchar();
 		system("cls");
-		return 1;//³É¹¦Ê¹ÓÃ¿¨ÅÆ
+		return 1; //ï¿½É¹ï¿½Ê¹ï¿½Ã¿ï¿½ï¿½ï¿½
 	}
 }
