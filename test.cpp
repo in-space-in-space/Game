@@ -283,10 +283,7 @@ int Drawing(player &player)/*抽牌阶段*/
 	}
 	else
 		player.hand.card[player.hand.CardNum] = drawd;
-	if(!player.bot)
 	printf(" 抽到了卡牌 %s !\n", drawd.Name);
-	else
-	printf(" %s 行动完成!\n",player.playername);
 	if(drawd.Type)
 	player.hand.AttackNum++;
 	else
@@ -706,8 +703,17 @@ void Ge_Dang(player &player1,player &player2)
 		{
 			if(player1.deck_inturn.CardNum!=0)//可以抽牌
 			{
-				Drawing(player1);
-				break;
+				if(!player1.bot)
+				{
+					Drawing(player1);
+					break;
+				}
+				else
+				{
+					printf(" %s 选择抽牌!\n",player1.playername);
+					Bot_Draw(player1);
+					break;
+				}
 			}
 			else//无法抽牌
 			{
@@ -768,7 +774,6 @@ void Ge_Dang(player &player1,player &player2)
 		}
 	}
 	getchar();
-	getchar();
 	system("cls");
 	return;
 }
@@ -817,13 +822,11 @@ int Bot_choose(player &player)
 			{
 				if(Bot_Draw(player))
 				{
-					getchar();
 					system("cls");
 					return 0;//抽牌
 				}
 				else
 				{
-					getchar();
 					system("cls");
 					continue;//重新开始回合
 				}
@@ -844,9 +847,9 @@ int Bot_Draw(player &player)
 	int draw_loc;
 	draw_loc = rand() % player.deck_inturn.CardNum;
 	drawd = player.deck_inturn.card[draw_loc];
+	player.deck_inturn.CardNum--;
 	for (int j = draw_loc; j + 1 < player.deck_inturn.CardNum; j++)
 		player.deck_inturn.card[j] = player.deck_inturn.card[j + 1];
-	player.deck_inturn.CardNum--;
 	if (player.hand.CardNum == 5)
 	{
 		printf(" 手牌已满,卡牌 %s 进入弃牌库!\n", drawd.Name);
@@ -876,9 +879,9 @@ int Bot_Use(player &player)
 				Card_loc=rand()%player.hand.CardNum;
 			} while (!player.hand.card[Card_loc].Type);//选择攻击牌打出
 			player.Card_used=player.hand.card[Card_loc];
-			for (int i = Card_loc - 1; i + 1 < player.hand.CardNum; i++)
-			player.hand.card[i] = player.hand.card[i + 1];
 			player.hand.CardNum--;
+			for (int i = Card_loc; i< player.hand.CardNum; i++)
+			player.hand.card[i] = player.hand.card[i + 1];
 			printf(" %s 行动完成!\n", player.playername);
 			player.hand.AttackNum--;
 			getchar();
@@ -913,9 +916,9 @@ int Bot_Use(player &player)
 		else//无防御牌
 		Card_loc=rand()%player.hand.CardNum;//随机出卡;
 		player.Card_used=player.hand.card[Card_loc];
+		player.hand.CardNum--;
 		for (int i = Card_loc; i< player.hand.CardNum; i++)
 		player.hand.card[i] = player.hand.card[i + 1];
-		player.hand.CardNum--;
 		printf(" %s  行动完成!\n", player.playername);
 		if(player.Card_used.Type)//打出攻击牌
 		player.hand.AttackNum--;
@@ -926,4 +929,3 @@ int Bot_Use(player &player)
 		return 1;//成功使用卡牌
 	}
 }
-//嘿嘿
