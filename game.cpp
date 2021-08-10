@@ -9,7 +9,7 @@ typedef struct Card //���ƶ���
 	//������:tpye=1 ������:type=0
 	int Kind;//��������:������
 	//����kind=0 ��kind=1 ��kind=2 ��kind=3 ��kind=4 ǹkind=5
-	int Fun[10];//����Ч��
+	int Fun[15];//����Ч��
 	//ѹ��fun=0 �ƺ�fun=1 ����fun=2 ����fun=3 ׷��fun=4
 	//���fun=5 �ж�fun=6 ��ӡfun=7 ����fun=7 ����fun=8
 	char Name[10];//��������
@@ -142,7 +142,8 @@ int Cards_Initialize(Cards& cards)//���ļ��л�ȡ����
 	fscanf(fp,"%d",&Card_Num);
 	for (int i = 0; i < Card_Num; i++)
 	{
-		fscanf(fp, "%s %d %d %d %s", cards[i].Name, &cards[i].Type, &cards[i].Level, &cards[i].Kind, cards[i].text);
+		fscanf(fp, "%s", cards[i].Name);
+		fscanf(fp, " %d %d %d %s",&cards[i].Type, &cards[i].Level, &cards[i].Kind, cards[i].text);
 		do
 		{
 			fscanf(fp,"%d",&fun);
