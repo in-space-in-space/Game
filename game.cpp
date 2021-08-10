@@ -9,7 +9,7 @@ typedef struct Card//卡牌定义
 	//攻击牌:tpye=1 防御牌:type=0
 	int Kind;//卡牌种类:体术等
 	//体术kind=0 剑kind=1 弓kind=2 刀kind=3 刺kind=4 枪kind=5
-	int Fun[10];//卡牌效果
+	int Fun[15];//卡牌效果
 	//压制fun=0 制衡fun=1 不屈fun=2 攻心fun=3 追击fun=4
 	//标记fun=5 中毒fun=6 封印fun=7 易伤fun=7 穿刺fun=8
 	char Name[10];//卡牌名称
@@ -141,7 +141,8 @@ int Cards_Initialize(Cards& cards)//从文件中获取卡牌
 	fscanf(fp,"%d",&Card_Num);
 	for (int i = 0; i < Card_Num; i++)
 	{
-		fscanf(fp, "%s %d %d %d %s", cards[i].Name, &cards[i].Type, &cards[i].Level, &cards[i].Kind, cards[i].text);
+		fscanf(fp, "%s", cards[i].Name);
+		fscanf(fp, " %d %d %d %s",&cards[i].Type, &cards[i].Level, &cards[i].Kind, cards[i].text);
 		do
 		{
 			fscanf(fp,"%d",&fun);
