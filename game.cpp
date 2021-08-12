@@ -6,7 +6,7 @@ typedef struct Card //���ƶ���
 {
 	int Level;//���Ƶȼ�
 	int Type;//��������:����\����
-	//������:tpye=1 ������:type=0
+	//������:type=1 ������:type=0
 	int Kind;//��������:������
 	//����kind=0 ��kind=1 ��kind=2 ��kind=3 ��kind=4 ǹkind=5
 	int Fun[15];//����Ч��
@@ -14,9 +14,13 @@ typedef struct Card //���ƶ���
 	//���fun=5 �ж�fun=6 ��ӡfun=7 ����fun=7 ����fun=8
 	char Name[10];//��������
 	char text[100];//��������
-	int Num=3;
-}Card, Cards[100];
-typedef struct Deck//�ƿⶨ��
+}Card;
+typedef struct Cards//�ƿⶨ��
+{
+	Card cards[100];
+	int NUM;
+}Cards;
+typedef struct Deck//���ƶ���
 {
 	Card card[20];
 	int CardNum = 0;
@@ -44,13 +48,13 @@ typedef struct player //��Ҷ���
 	int Sealed[5];//��ӡ
 	int Turn_mode;//�غ�ģʽ,1Ϊ����,0Ϊ����
     Card Card_used;//�ϻغ�ʹ�ÿ���
-    int acttion;//�ϻغ��ж�,1Ϊ����,0Ϊ����
+    int action;//�ϻغ��ж�,1Ϊ����,0Ϊ����
 }player;
 /*------------------------------���岿��--------------------------------------------*/
-int Preparation();//��Ϸ��ʼǰ׼��
-int Cards_Initialize(Cards& cards);//���ļ��ж�ȡ���п�����Ϣ
-void Deck_Initialize(player &player);//���Ƴ�ʼ��
-void PlayTurn(Cards cards, player& player1, player& player2);
+int Name_Initialize(player& player1, player& player2);
+int Cards_Initialize(Cards& cards);
+void Deck_Initialize(player &player);
+int PlayTurn(Cards cards, player& player1, player& player2);
 int StartTurn(player& player1, player& player2);
 int Start_Drawing(player &player);
 int Drawing(player &player);
@@ -60,13 +64,16 @@ int Use(player &player);
 void Show_Turn(player player);
 void Show_HP(player player);
 void Show_Hand(player player);
-int Settlement(player &player1, player &player2);
+void Show_Card(Card card);
+void Show_Deck(Deck deck);
+int Settlement(player& player1,player& player2);
 void Level_calculate(player &player);
-void Card_damage(player &player1, player &player2);
-int If_Over(player player1, player player2);
-void PlayTurn_Over(player player1, player player2, int flag);
-void Card_function(player &player1, player &player2);
-int Fun_0_yazhi(player &player1, player &player2);
+void Card_damage(player& player1,player& player2);
+int If_Over(player player1,player player2);
+int PlayTurn_Over(player player1, player player2, int flag);
+int GetCard(Cards &cards,player &player1,player &player2,int winner);
+void Card_function(player &player1,player &player2);
+int Fun_0_yazhi(player &player1,player &player2);
 int Bot_choose(player &player);
 int Bot_Draw(player &player);
 int Bot_Use(player &player);
@@ -75,11 +82,11 @@ void Ge_Dang(player &player1, player &player2);
 /*------------------------------��������--------------------------------------------*/
 int main()
 {
-	Cards cards;
+	Cards Cards;
 	player player1;
 	player player2;
-	int op;
-	if (Cards_Initialize(cards))
+	int op,winner;
+	if (Cards_Initialize(Cards))
 	{
 		printf("   ���ƶ�ȡ���!\n   ���»س���ʼ!\n");
 		getchar();
@@ -91,21 +98,34 @@ int main()
 		getchar();
 		return 0;
 	}
-	{ //ѡ���Ƿ�����Խ�����Ϸ
-		printf(" �Ƿ�����Զ�ս?\n 1.�� 0.��\n");
-		scanf("%d", &op);
-		if (op)
-			player2.bot = 1;
-		else
-			;
+	{//ѡ���Ƿ�����Խ�����Ϸ
+		printf("  �Ƿ�����Զ�ս?\n 1.�� 0.��\n");
+		scanf("%d",&op);
+		if(op)
+		player2.bot=1;
+		else;
 		system("cls");
 	}
 	Deck_Initialize(player1);
 	Deck_Initialize(player2);
-	PlayTurn(cards, player1, player2);
+	while(1)
+	{
+		winner=PlayTurn(Cards, player1, player2);
+		GetCard(Cards,player1,player2,winner);
+	}
+	return 0;
+}
+int Name_Initialize(player& player1, player& player2)
+{
+	strcpy(player1.playername,"���1");
+	if(!player2.bot)
+	strcpy(player2.playername,"���2");
+	else
+	strcpy(player2.playername,"���ǵ���");
 }
 void Deck_Initialize(player &player)//�����ʼ��
 {
+	srand(time(NULL));
 	for (int i = 0; i < 5; i++)
 	{
 		strcpy(player.deck.card[i].Name, "ȭ");
@@ -133,66 +153,65 @@ void Deck_Initialize(player &player)//�����ʼ��
 	}
 	player.deck.CardNum = 10;
 }
-int Cards_Initialize(Cards& cards)//���ļ��л�ȡ����
+int Cards_Initialize(Cards& Cards)//���ļ��л�ȡ����
 {
 	FILE* fp;
-	int fun,Card_Num;
+	int fun;
 	if (fp = fopen(".\\card.txt", "r"));
 	else return 0;
-	fscanf(fp,"%d",&Card_Num);
-	for (int i = 0; i < Card_Num; i++)
+	fscanf(fp,"%d",&Cards.NUM);
+	for (int i = 0; i < Cards.NUM; i++)
 	{
-		fscanf(fp, "%s", cards[i].Name);
-		fscanf(fp, " %d %d %d %s",&cards[i].Type, &cards[i].Level, &cards[i].Kind, cards[i].text);
+		fscanf(fp, "%s %d %d %d %s", Cards.cards[i].Name,&Cards.cards[i].Type, &Cards.cards[i].Level, &Cards.cards[i].Kind, Cards.cards[i].text);
 		do
 		{
 			fscanf(fp,"%d",&fun);
-			cards[i].Fun[fun] = 1;
+			Cards.cards[i].Fun[fun] = 1;
 		} while (fun);
-		printf("%-8s %4d %4d %4d    %s\n", cards[i].Name, cards[i].Type, cards[i].Level, cards[i].Kind, cards[i].text);
+		Cards.cards[i+Cards.NUM]=Cards.cards[i];
+		Cards.cards[i+2*Cards.NUM]=Cards.cards[i];
 	}
+	Cards.NUM*=3;
 	fclose(fp);
 	return 1;
 }
-void PlayTurn(Cards cards, player &player1, player &player2) //��Ϸ�غ�
+int PlayTurn(Cards cards, player& player1, player& player2)//��Ϸ�غ�
 {
-	player1.deck_inturn = player1.deck; //�غ���ʹ�õ����Ƹ���
-	player2.deck_inturn = player2.deck;
-	int TurnNum = 1, Over_flag = 0;
+	int TurnNum = 1,Over_flag=0;
 	StartTurn(player1, player2);
 	while (1)
 	{
-		if (player1.Turn_mode)
-		{
-			printf(" ��%d�غ�:\n", TurnNum);
-			player1.acttion = Choose(player1);
-			printf(" ��%d�غ�:\n", TurnNum);
-			if (!player2.bot)
-				player2.acttion = Choose(player2);
+        if(player1.Turn_mode)
+        {
+			printf(" ��%d�غ�:\n",TurnNum);
+            player1.action=Choose(player1);
+			printf(" ��%d�غ�:\n",TurnNum);
+			if(!player2.bot)
+            player2.action=Choose(player2);
 			else
-				player2.acttion = Bot_choose(player2);
-		}
-		else
-		{
-			printf(" ��%d�غ�:\n", TurnNum);
-			if (!player2.bot)
-				player2.acttion = Choose(player2);
+			player2.action=Bot_choose(player2);
+        }
+        else
+        {
+			printf(" ��%d�غ�:\n",TurnNum);
+            if(!player2.bot)
+            player2.action=Choose(player2);
 			else
-				player2.acttion = Bot_choose(player2);
-			printf(" ��%d�غ�:\n", TurnNum);
-			player1.acttion = Choose(player1);
-		}
-		if (player1.acttion == 2 && player2.acttion != 2)
+			player2.action=Bot_choose(player2);
+			printf(" ��%d�غ�:\n",TurnNum);
+            player1.action=Choose(player1);
+        }
+		if(player1.action==2&&player2.action!=2)
 		{
 			Over_flag = 2;
 			break;
 		}
-		else if (player2.acttion == 2 && player1.acttion != 2)
+		else if(player2.action==2&&player1.action!=2)
 		{
 			Over_flag = 1;
 			break;
 		}
-		else if (player1.acttion == 2 && player2.acttion == 2)
+		else if(player1.action==2&&player2.action==2)
 		{
 			Over_flag = 3;
 			break;
@@ -204,16 +223,13 @@ void PlayTurn(Cards cards, player &player1, player &player2) //��Ϸ�غ�
 			break;
 		TurnNum++;
 	}
-	PlayTurn_Over(player1, player2, Over_flag);
+	return (PlayTurn_Over(player1,player2,Over_flag));
 }
-int StartTurn(player &player1, player &player2) //��Ϸ��ʼǰ���ƺ;������ط�
-{
-	strcpy(player1.playername, "���1");
-	if (!player2.bot)
-		strcpy(player2.playername, "���2");
-	else
-		strcpy(player2.playername, "���ǵ���");
-	srand(time(NULL));
+int StartTurn(player& player1, player& player2)//��Ϸ��ʼǰ���ƺ;������ط�
+{	
+	Name_Initialize(player1,player2);
+	player1.deck_inturn = player1.deck;//�غ���ʹ�õ����Ƹ���
+	player2.deck_inturn = player2.deck;
 	Start_Drawing(player1);
 	Start_Drawing(player2);
 	if (First_Attack_Decide())
@@ -233,6 +249,9 @@ int First_Attack_Decide() /*�����ȹ�*/
 }
 int Start_Drawing(player &player) /*��ʼ����*/
 {
+	player.hand.CardNum=0;
+	player.hand.AttackNum=0;
+	player.hand.DefenceNum=0;
 	for (int i = 0; i < 5; i++)
 	{
 		int draw_loc;
@@ -347,6 +366,7 @@ int Choose(player &player) /*ѡ�ƽ׶�*/
 		else
 		{
 			printf(" ������!\n");
+			getchar();
 			getchar();
 			system("cls");
 			return 2; //����
@@ -467,7 +487,28 @@ void Show_Hand(player player) //��ʾ����
 		printf(" %d.%s ", i + 1, player.hand.card[i].Name);
 	printf("\n");
 }
-int Settlement(player &player1, player &player2) /*����׶�*/
+void Show_Card(Card card)//��ʾ������Ϣ
+{
+	if(card.Kind==0)
+	printf(" ���� ");
+	printf(" ���� %s \n",card.Name);
+	if(card.Type)
+	printf(" �����ȼ�:");
+	else
+	printf(" �����ȼ�:");
+	printf(" %d\n",card.Level);
+	printf(" %s\n",card.text);
+}
+void Show_Deck(Deck deck)//��ʾ������Ϣ
+{
+	for(int i=0;i<deck.CardNum;i++)
+	{
+		printf("%d.%-8s",i+1,deck.card[i].Name);
+		if(!(i%5))
+		printf("\n");
+	}
+}
+int Settlement(player& player1,player& player2)/*����׶�*/
 {
     Level_calculate(player1);
     Level_calculate(player2);
@@ -499,33 +540,33 @@ void Card_damage(player &player1, player &player2) //���㿨�Ƶȼ���
 	if(player1.Turn_mode)
     {
         printf(" ������ %s ѡ�� ",player1.playername);
-        if(player1.acttion==1)
+        if(player1.action==1)
         printf("����\n %s ���������:%2s  ���Ƶȼ�:%d  ����Ч��:%s\n\n",player1.playername,player1.Card_used.Name,player1.Card_used.Level,player1.Card_used.text);
-        else if(player1.acttion==0)
+        else if(player1.action==0)
         printf("����\n\n");
 		else 
 		printf("�����غ�\n");
         printf(" ������ %s ѡ�� ",player2.playername);
-        if(player2.acttion==1)
+        if(player2.action==1)
         printf("����\n %s ���������:%2s  ���Ƶȼ�:%d  ����Ч��:%s\n\n",player2.playername,player2.Card_used.Name,player2.Card_used.Level,player2.Card_used.text);
-        else if(player2.acttion==0)
+        else if(player2.action==0)
         printf("����\n\n");
 		else 
 		printf("�����غ�\n");
         printf(" ������:");
-        if(player1.acttion==1&&player2.acttion==1&&(player1.Card_used.Level>player2.Card_used.Level))
+        if(player1.action==1&&player2.action==1&&(player1.Card_used.Level>player2.Card_used.Level))
         {
             damage=player1.Card_used.Level-player2.Card_used.Level;
             player2.HP-=damage;
             printf(" %s �� %s ����� %d ���˺�!\n",player1.playername,player2.playername,damage);
         }
-		else if(player1.acttion==1&&player2.acttion!=1)
+		else if(player1.action==1&&player2.action!=1)
 		{
 			damage=player1.Card_used.Level;
 			player2.HP-=damage;
 			printf(" %s �� %s ����� %d ���˺�!\n",player1.playername,player2.playername,damage);
 		}
-        else if(player1.acttion!=1||player1.Card_used.Level<player2.Card_used.Level)
+        else if(player1.action!=1||player1.Card_used.Level<player2.Card_used.Level)
         {
             player1.Turn_mode=0;
             player2.Turn_mode=1;
@@ -538,33 +579,33 @@ void Card_damage(player &player1, player &player2) //���㿨�Ƶȼ���
     else
     {
         printf(" ������ %s ѡ�� ",player2.playername);
-        if(player2.acttion==1)
+        if(player2.action==1)
         printf("����\n %s ��������� %4s  ���Ƶȼ� %d  ����Ч�� %s\n",player2.playername,player2.Card_used.Name,player2.Card_used.Level,player2.Card_used.text);
-        else if(player2.acttion==0)
+        else if(player2.action==0)
         printf("����\n\n");
 		else 
 		printf("�����غ�\n");
         printf(" ������ %s ѡ�� ",player1.playername);
-        if(player1.acttion==1)
+        if(player1.action==1)
         printf("����\n %s ��������� %4s  ���Ƶȼ� %d  ����Ч�� %s\n",player1.playername,player1.Card_used.Name,player1.Card_used.Level,player1.Card_used.text);
-        else if(player1.acttion==0)
+        else if(player1.action==0)
         printf("����\n\n");
 		else 
 		printf("�����غ�\n");
 		printf(" ������:");
-        if(player1.acttion==1&&player2.acttion==1&&(player2.Card_used.Level>player1.Card_used.Level))
+        if(player1.action==1&&player2.action==1&&(player2.Card_used.Level>player1.Card_used.Level))
         {
             damage=player2.Card_used.Level-player1.Card_used.Level;
             player1.HP-=damage;
             printf(" %s �� %s ����� %d ���˺�!\n",player2.playername,player1.playername,damage);
         }
-		else if(player2.acttion==1&&player1.acttion!=1)
+		else if(player2.action==1&&player1.action!=1)
 		{
 			damage=player2.Card_used.Level;
 			player1.HP-=damage;
 			printf(" %s �� %s ����� %d ���˺�!\n",player2.playername,player1.playername,damage);
 		}
-		else if(player2.acttion!=1||player2.Card_used.Level<player1.Card_used.Level)
+		else if(player2.action!=1||player2.Card_used.Level<player1.Card_used.Level)
         {
             player2.Turn_mode=0;
             player1.Turn_mode=1;
@@ -577,13 +618,13 @@ void Card_damage(player &player1, player &player2) //���㿨�Ƶȼ���
 }
 int If_Over(player player1, player player2) //�ж���Ϸ�Ƿ����.
 {
-	if (player1.acttion == 2 && player2.acttion != 2)
-		return 2; //���2ʤ��
-	else if (player2.acttion == 2 && player1.acttion != 2)
-		return 1; //���1ʤ��
-	else if (player1.acttion == 2 && player2.acttion == 2)
-		return 3; //ƽ��
-	if ((player1.hand.CardNum == 0) && (player2.hand.CardNum == 0) && (player2.deck_inturn.CardNum == 0) && (player1.deck_inturn.CardNum == 0))
+	if(player1.action==2&&player2.action!=2)
+	return 2;//���2ʤ��
+	else if(player2.action==2&&player1.action!=2)
+	return 1;//���1ʤ��
+	else if(player1.action==2&&player2.action==2)
+	return 3;//ƽ��
+	if((player1.hand.CardNum==0)&&(player2.hand.CardNum==0)&&(player2.deck_inturn.CardNum==0)&&(player1.deck_inturn.CardNum==0))
 	{
 		if (player1.HP > player2.HP)
 			return 1; //���1ʤ��
@@ -594,59 +635,448 @@ int If_Over(player player1, player player2) //�ж���Ϸ�Ƿ����.
 	}
 	return 0; //��Ϸδ����
 }
-void PlayTurn_Over(player player1, player player2, int flag) //��Ϸ�غϽ���
+int PlayTurn_Over(player player1, player player2, int flag)//��Ϸ�غϽ���
 {
 	if (flag == 1)
 	{
-		if(player2.acttion==2)
+		if(player2.action==2)
 		printf(" \n%s ����, %s ��ʤ!\n",player2.playername,player1.playername);
 		else
 		{
 			printf(" \n%s ʣ������: %d  \n%s ʣ������: %d \n",player2.playername,player1.HP,player1.playername,player2.HP);
 			printf(" \n%s ������, %s ��ʤ\n",player2.playername,player1.playername);
 		}
+		getchar();
+		system("cls");
+		return 1;//���1Ӯ
 	}
 	else if (flag == 2)
 	{
-		if(player1.acttion==2)
+		if(player1.action==2)
 		printf(" \n%s ����, %s ��ʤ!\n",player1.playername,player2.playername);
 		else
 		{
 			printf(" \n%s ʣ������: %d  \n%s ʣ������: %d \n",player1.playername,player1.HP,player1.playername,player2.HP);
 			printf(" \n%s ������, %s ��ʤ\n",player1.playername,player2.playername);
 		}
+		getchar();
+		system("cls");
+		return 2;//���2Ӯ
 	}
 	else
 	{
-		if (player1.acttion == 2)
-			printf(" \n˫��ͬʱ����,ƽ��!\n");
+		if(player1.action==2)
+		printf(" \n˫��ͬʱ����,ƽ��!\n");
 		else
-			printf(" \n˫��ʣ���������,ƽ��!\n");
+		printf(" \n˫��ʣ���������,ƽ��!\n");
+		getchar();
+		system("cls");
+		return 0;//ƽ��
 	}
-	getchar();
-	system("cls");
-	return;
+}
+int GetCard(Cards &Cards,player &player1,player &player2,int winner)//���ƻ�ȡ����
+{
+	Card card1,card2;
+	int Card_loc1,Card_loc2,op;
+	Card_loc1=rand()%Cards.NUM;
+	card1=Cards.cards[Card_loc1];
+	Card_loc2=rand()%Cards.NUM;
+	card2=Cards.cards[Card_loc2];
+	if(winner==0)//ƽ��
+	{
+		{//���1��ÿ���
+			printf(" %s �鵽�˿��� %s!\n\n",player1.playername,card1.Name);
+			Show_Card(card1);
+			if(player1.deck.CardNum<20)//����δ��
+			{
+				printf("�ѽ� %s ����������!\n",card1.Name);
+				player1.deck.card[player1.deck.CardNum]=card1;//��ÿ���
+				Cards.NUM--;
+				player1.deck.CardNum++;
+				for(int i=Card_loc1;i<Cards.NUM;i++)
+				Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+			}
+			else//��������
+			{
+				printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+				Show_Deck(player1.deck);
+				printf(" 1~20.���� 0.����\n");
+				scanf("%d",&op);
+				if(op==0)
+				printf(" ������ÿ��� %s !\n",card1.Name);
+				else
+				{
+					if((strcmp(player1.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player1.deck.card[op-1].Name,"��")!=0)&&(strcmp(player1.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+					Cards.cards[Card_loc1]=player1.deck.card[op-1];//�����ƿ��п���
+					else;//�����ǳ�ʼ����
+					player1.deck.card[op-1]=card1;//��ÿ���
+					Cards.NUM--;
+					for(int i=Card_loc1;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+				}
+			}
+			getchar();
+			system("cls");
+		}
+		{//���2��ÿ���
+			printf(" %s �鵽�˿��� %s!\n\n",player2.playername,card2.Name);
+			Show_Card(card2);
+			if(player2.deck.CardNum<20)//����δ��
+			{
+				printf("�ѽ� %s ����������!\n",card2.Name);
+				player2.deck.card[player2.deck.CardNum]=card2;//��ÿ���
+				Cards.NUM--;
+				player2.deck.CardNum++;
+				for(int i=Card_loc2;i<Cards.NUM;i++)
+				Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+			}
+			else//��������
+			{
+				printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+				Show_Deck(player2.deck);
+				printf(" 1~20.���� 0.����\n");
+				scanf("%d",&op);
+				if(op==0)
+				printf(" ������ÿ��� %s !\n",card2.Name);
+				else
+				{
+					if((strcmp(player2.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+					Cards.cards[Card_loc2]=player2.deck.card[op-1];//�����ƿ��п���
+					else;//�����ǳ�ʼ����
+					player2.deck.card[op-1]=card2;//��ÿ���
+					Cards.NUM--;
+					for(int i=Card_loc2;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+				}
+			}
+			getchar();
+			system("cls");
+		}
+	}
+	else if(winner==1)//���1ʤ��
+	{
+		printf(" �鵽�����¿���:\n");
+		printf(" ����1: %s ",card1.Name);
+		Show_Card(card1);
+		printf(" ����2: %s ",card2.Name);
+		Show_Card(card2);
+		printf(" �� %s ѡ��һ���Ƽ���������,���߷���ѡ��!\n",player1.playername);
+		printf(" 1.����1 2.����2 0.����ѡ��\n");
+		scanf("%d",&op);
+		if(op==0);//����
+		else if(op==1)//����1
+		{
+			{//���1��ÿ���
+				printf(" %s ",player1.playername);
+				if(player1.deck.CardNum<20)//����δ��
+				{
+					printf("�ѽ� %s �����������!\n",card1.Name);
+					player1.deck.card[player1.deck.CardNum]=card1;//��ÿ���
+					Cards.NUM--;
+					player1.deck.CardNum++;
+					for(int i=Card_loc1;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+				}
+				else//��������
+				{
+					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+					Show_Deck(player1.deck);
+					printf(" 1~20.���� 0.����\n");
+					scanf("%d",&op);
+					if(op==0)
+					printf(" ������ÿ��� %s !\n",card1.Name);
+					else
+					{
+						if((strcmp(player1.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player1.deck.card[op-1].Name,"��")!=0)&&(strcmp(player1.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+						Cards.cards[Card_loc1]=player1.deck.card[op-1];//�����ƿ��п���
+						else;//�����ǳ�ʼ����
+						player1.deck.card[op-1]=card1;//��ÿ���
+						Cards.NUM--;
+						player2.deck.CardNum++;
+						for(int i=Card_loc1;i<Cards.NUM;i++)
+						Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+					}
+				}
+				getchar();
+				getchar();
+				system("cls");
+			}
+			{//���2��ÿ���
+				printf(" %s ",player2.playername);
+				if(player2.deck.CardNum<20)//����δ��
+				{
+					printf("�ѽ� %s ����������!\n",card2.Name);
+					player2.deck.card[player2.deck.CardNum]=card2;//��ÿ���
+					Cards.NUM--;
+					player2.deck.CardNum++;
+					for(int i=Card_loc2;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+				}
+				else//��������
+				{
+					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+					Show_Deck(player2.deck);
+					printf(" 1~20.���� 0.����\n");
+					scanf("%d",&op);
+					if(op==0)
+					printf(" ������ÿ��� %s !\n",card2.Name);
+					else
+					{
+						if((strcmp(player2.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+						Cards.cards[Card_loc2]=player2.deck.card[op-1];//�����ƿ��п���
+						else;//�����ǳ�ʼ����
+						player2.deck.card[op-1]=card2;//��ÿ���
+						Cards.NUM--;
+						for(int i=Card_loc2;i<Cards.NUM;i++)
+						Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+					}
+				}
+				getchar();
+				system("cls");
+			}
+		}
+		else//����2
+		{
+			{//���1��ÿ���
+				printf(" %s ",player1.playername);
+				if(player1.deck.CardNum<20)//����δ��
+				{
+					printf("�ѽ� %s ����������!\n",card2.Name);
+					player1.deck.card[player1.deck.CardNum]=card2;//��ÿ���
+					Cards.NUM--;
+					player1.deck.CardNum++;
+					for(int i=Card_loc2;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+				}
+				else//��������
+				{
+					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+					Show_Deck(player1.deck);
+					printf(" 1~20.���� 0.����\n");
+					scanf("%d",&op);
+					if(op==0)
+					printf(" ������ÿ��� %s !\n",card2.Name);
+					else
+					{
+						if((strcmp(player1.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player1.deck.card[op-1].Name,"��")!=0)&&(strcmp(player1.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+						Cards.cards[Card_loc2]=player1.deck.card[op-1];//�����ƿ��п���
+						else;//�����ǳ�ʼ����
+						player1.deck.card[op-1]=card2;//��ÿ���
+						Cards.NUM--;
+						for(int i=Card_loc2;i<Cards.NUM;i++)
+						Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+					}
+				}
+				getchar();
+				getchar();
+				system("cls");
+			}
+			{//���2��ÿ���
+				printf(" %s ",player2.playername);
+				if(player2.deck.CardNum<20)//����δ��
+				{
+					printf("�ѽ� %s ����������!\n",card1.Name);
+					player2.deck.card[player2.deck.CardNum]=card1;//��ÿ���
+					Cards.NUM--;
+					player2.deck.CardNum++;
+					for(int i=Card_loc1;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+				}
+				else//��������
+				{
+					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+					Show_Deck(player2.deck);
+					printf(" 1~20.���� 0.����\n");
+					scanf("%d",&op);
+					if(op==0)
+					printf(" ������ÿ��� %s !\n",card1.Name);
+					else
+					{
+						if((strcmp(player2.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+						Cards.cards[Card_loc1]=player2.deck.card[op-1];//�����ƿ��п���
+						else;//�����ǳ�ʼ����
+						player2.deck.card[op-1]=card1;//��ÿ���
+						Cards.NUM--;
+						for(int i=Card_loc1;i<Cards.NUM;i++)
+						Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+					}
+				}
+				getchar();
+				getchar();
+				system("cls");
+			}
+		}
+	}
+	else//���2ʤ��
+	{
+		printf(" �鵽�����¿���:\n");
+		printf(" ����1: %s ",card1.Name);
+		Show_Card(card1);
+		printf(" ����2: %s ",card2.Name);
+		Show_Card(card2);
+		printf(" ��ѡ��һ���Ƽ���������,���߷���ѡ��!\n");
+		printf(" 1.����1 2.����2 0.����ѡ��\n");
+		scanf("%d",&op);
+		if(op==0);//����
+		else if(op==1)//����1
+		{
+			{//���2��ÿ���
+				printf(" %s ",player2.playername);
+				if(player2.deck.CardNum<20)//����δ��
+				{
+					printf("�ѽ� %s ����������!\n",card1.Name);
+					player2.deck.card[player2.deck.CardNum]=card1;//��ÿ���
+					Cards.NUM--;
+					player2.deck.CardNum++;
+					for(int i=Card_loc1;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+				}
+				else//��������
+				{
+					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+					Show_Deck(player2.deck);
+					printf(" 1~20.���� 0.����\n");
+					scanf("%d",&op);
+					if(op==0)
+					printf(" ������ÿ��� %s !\n",card1.Name);
+					else
+					{
+						if((strcmp(player2.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+						Cards.cards[Card_loc1]=player2.deck.card[op-1];//�����ƿ��п���
+						else;//�����ǳ�ʼ����
+						player2.deck.card[op-1]=card1;//��ÿ���
+						Cards.NUM--;
+						for(int i=Card_loc1;i<Cards.NUM;i++)
+						Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+					}
+				}
+				getchar();
+				getchar();
+				system("cls");
+			}
+			{//���1��ÿ���
+				printf(" %s ",player1.playername);
+				if(player1.deck.CardNum<20)//����δ��
+				{
+					printf("�ѽ� %s ����������!\n",card2.Name);
+					player1.deck.card[player1.deck.CardNum]=card2;//��ÿ���
+					Cards.NUM--;
+					player1.deck.CardNum++;
+					for(int i=Card_loc2;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+				}
+				else//��������
+				{
+					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+					Show_Deck(player1.deck);
+					printf(" 1~20.���� 0.����\n");
+					scanf("%d",&op);
+					if(op==0)
+					printf(" ������ÿ��� %s !\n",card2.Name);
+					else
+					{
+						if((strcmp(player1.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player1.deck.card[op-1].Name,"��")!=0)&&(strcmp(player1.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+						Cards.cards[Card_loc2]=player1.deck.card[op-1];//�����ƿ��п���
+						else;//�����ǳ�ʼ����
+						player1.deck.card[op-1]=card2;//��ÿ���
+						Cards.NUM--;
+						for(int i=Card_loc2;i<Cards.NUM;i++)
+						Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+					}
+				}
+				getchar();
+				system("cls");
+			}
+		}
+		else//����2
+		{
+			{//���2��ÿ���
+				printf(" %s ",player2.playername);
+				if(player2.deck.CardNum<20)//����δ��
+				{
+					printf("�ѽ� %s ����������!\n",card2.Name);
+					player2.deck.card[player2.deck.CardNum]=card2;//��ÿ���
+					Cards.NUM--;
+					player2.deck.CardNum++;
+					for(int i=Card_loc2;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+				}
+				else//��������
+				{
+					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+					Show_Deck(player2.deck);
+					printf(" 1~20.���� 0.����\n");
+					scanf("%d",&op);
+					if(op==0)
+					printf(" ������ÿ��� %s !\n",card2.Name);
+					else
+					{
+						if((strcmp(player2.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+						Cards.cards[Card_loc2]=player2.deck.card[op-1];//�����ƿ��п���
+						else;//�����ǳ�ʼ����
+						player2.deck.card[op-1]=card2;//��ÿ���
+						Cards.NUM--;
+						for(int i=Card_loc2;i<Cards.NUM;i++)
+						Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+					}
+				}
+				getchar();
+				getchar();
+				system("cls");
+			}
+			{//���1��ÿ���
+			printf(" %s ",player1.playername);
+				if(player1.deck.CardNum<20)//����δ��
+				{
+					printf("�ѽ� %s ����������!\n",card1.Name);
+					player1.deck.card[player1.deck.CardNum]=card1;//��ÿ���
+					Cards.NUM--;
+					player1.deck.CardNum++;
+					for(int i=Card_loc1;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+				}
+				else//��������
+				{
+					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+					Show_Deck(player1.deck);
+					printf(" 1~20.���� 0.����\n");
+					scanf("%d",&op);
+					if(op==0)
+					printf(" ������ÿ��� %s !\n",card1.Name);
+					else
+					{
+						if((strcmp(player1.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player1.deck.card[op-1].Name,"��")!=0)&&(strcmp(player1.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+						Cards.cards[Card_loc1]=player1.deck.card[op-1];//�����ƿ��п���
+						else;//�����ǳ�ʼ����
+						player1.deck.card[op-1]=card1;//��ÿ���
+						Cards.NUM--;
+						for(int i=Card_loc1;i<Cards.NUM;i++)
+						Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+					}
+				}
+				getchar();
+				getchar();
+				system("cls");
+			}
+		}
+	}
+	return 0;
 }
 void Card_function(player &player1, player &player2) //����Ч����������
 {
-	if (player1.acttion == 1 && player2.acttion == 1) //˫��������
+	if(player1.action==1&&player2.action==1)//˫��������
 	{
 		//���1ʹ�õĿ���Ч���ж�--------------------------------------------
-		if (player1.Card_used.Fun[0])
+		if(player1.Card_used.Fun[1])//ѹ��Ч��
 		{
 			if (player1.Card_used.Level > player2.Card_used.Level)
 				Fun_0_yazhi(player1, player2);
 		}
 
 		//���2ʹ�õĿ���Ч���ж�--------------------------------------------
-		if (player2.Card_used.Fun[0])
-		{
-			if (player2.Card_used.Level > player1.Card_used.Level)
-				Fun_0_yazhi(player2, player1);
-		}
+		if(player2.Card_used.Fun[1])//ѹ��Ч��
 		return;
 	}
-	else //����
 		;
 }
 int Fun_0_yazhi(player &player1, player &player2) //����ѹ��Ч����������
