@@ -51,7 +51,7 @@ typedef struct player//玩家定义
     int action;//上回合行动,1为出牌,0为抽牌
 }player;
 /*------------------------------定义部分--------------------------------------------*/
-int Name_Initialize(player& player1, player& player2);
+void Name_Initialize(player& player1, player& player2);
 int Cards_Initialize(Cards& cards);
 void Deck_Initialize(player &player);
 int PlayTurn(Cards cards, player& player1, player& player2);
@@ -115,7 +115,7 @@ int main()
 	}
 	return 0;
 }
-int Name_Initialize(player& player1, player& player2)
+void Name_Initialize(player& player1, player& player2)
 {
 	strcpy(player1.playername,"玩家1");
 	if(!player2.bot)
@@ -233,9 +233,15 @@ int StartTurn(player& player1, player& player2)//游戏开始前抽牌和决定攻守方
 	Start_Drawing(player1);
 	Start_Drawing(player2);
 	if (First_Attack_Decide())
-		player1.Turn_mode = 1;
+		{
+			player1.Turn_mode = 1;
+			player2.Turn_mode=0;
+		}
 	else
-		player2.Turn_mode = 1;
+		{
+			player2.Turn_mode = 1;
+			player1.Turn_mode=0;
+		}
     if(player1.Turn_mode)
     printf(" %s 获得先攻!\n",player1.playername);
     else
@@ -498,7 +504,7 @@ void Show_Card(Card card)//显示卡牌信息
 	else
 	printf(" 防御等级:");
 	printf(" %d\n",card.Level);
-	printf(" %s\n",card.text);
+	printf(" %s\n\n",card.text);
 }
 void Show_Deck(Deck deck)//显示套牌信息
 {
@@ -683,6 +689,7 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 	card1=Cards.cards[Card_loc1];
 	Card_loc2=rand()%Cards.NUM;
 	card2=Cards.cards[Card_loc2];
+	printf(" 奖励卡牌获取:\n");
 	if(winner==0)//平局
 	{
 		{//玩家1获得卡牌
@@ -720,11 +727,19 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 			system("cls");
 		}
 		{//玩家2获得卡牌
-			printf(" %s 抽到了卡牌 %s!\n\n",player2.playername,card2.Name);
-			Show_Card(card2);
-			if(player2.deck.CardNum<20)//套牌未满
+			if(!player2.bot)//人类
 			{
-				printf("已将 %s 加入套牌中!\n",card2.Name);
+				printf(" %s 抽到了卡牌 %s!\n\n",player2.playername,card2.Name);
+				Show_Card(card2);
+			}
+			else//机器人
+			printf(" %s 机器人抽到了卡牌!\n\n");
+			if(player2.deck.CardNum<20)//套牌未满
+			{	
+				if(!player2.bot)//人
+				printf(" 已将 %s 加入套牌中!\n",card2.Name);
+				else//机器
+				printf(" %s 完成选择!\n",player2.playername);
 				player2.deck.card[player2.deck.CardNum]=card2;//获得卡牌
 				Cards.NUM--;
 				player2.deck.CardNum++;
@@ -733,10 +748,17 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 			}
 			else//套牌已满
 			{
-				printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
-				Show_Deck(player2.deck);
-				printf(" 1~20.交换 0.放弃\n");
-				scanf("%d",&op);
+				if(!player2.bot)//人
+				{
+					printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
+					Show_Deck(player2.deck);
+					printf(" 1~20.交换 0.放弃\n");
+					scanf("%d",&op);
+				}
+				else//机器
+				{
+					op=rand()%21;
+				}
 				if(op==0)
 				printf(" 放弃获得卡牌 %s !\n",card2.Name);
 				else
@@ -756,10 +778,10 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 	}
 	else if(winner==1)//玩家1胜利
 	{
-		printf(" 抽到了以下卡牌:\n");
-		printf(" 卡牌1: %s ",card1.Name);
+		printf(" 抽到了以下卡牌:\n\n");
+		printf(" 卡牌1: %s \n",card1.Name);
 		Show_Card(card1);
-		printf(" 卡牌2: %s ",card2.Name);
+		printf(" 卡牌2: %s \n",card2.Name);
 		Show_Card(card2);
 		printf(" 请 %s 选择一张牌加入套牌中,或者放弃选择!\n",player1.playername);
 		printf(" 1.卡牌1 2.卡牌2 0.放弃选择\n");
@@ -815,10 +837,17 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				}
 				else//套牌已满
 				{
-					printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
-					Show_Deck(player2.deck);
-					printf(" 1~20.交换 0.放弃\n");
-					scanf("%d",&op);
+					if(!player2.bot)//人
+					{
+						printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
+						Show_Deck(player2.deck);
+						printf(" 1~20.交换 0.放弃\n");
+						scanf("%d",&op);
+					}
+					else//机器
+					{
+						op=rand()%21;
+					}
 					if(op==0)
 					printf(" 放弃获得卡牌 %s !\n",card2.Name);
 					else
@@ -885,22 +914,29 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				}
 				else//套牌已满
 				{
+					if(!player2.bot)//人
+				{
 					printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
 					Show_Deck(player2.deck);
 					printf(" 1~20.交换 0.放弃\n");
 					scanf("%d",&op);
-					if(op==0)
-					printf(" 放弃获得卡牌 %s !\n",card1.Name);
-					else
-					{
-						if((strcmp(player2.deck.card[op-1].Name,"拳")!=0)&&(strcmp(player2.deck.card[op-1].Name,"腿")!=0)&&(strcmp(player2.deck.card[op-1].Name,"格挡")!=0))//卡牌非初始卡牌
-						Cards.cards[Card_loc1]=player2.deck.card[op-1];//交换牌库中卡牌
-						else;//卡牌是初始卡牌
-						player2.deck.card[op-1]=card1;//获得卡牌
-						Cards.NUM--;
-						for(int i=Card_loc1;i<Cards.NUM;i++)
-						Cards.cards[i]=Cards.cards[i+1];//从牌库中移除卡牌
-					}
+				}
+				else//机器
+				{
+					op=rand()%21;
+				}
+				if(op==0)
+				printf(" 放弃获得卡牌 %s !\n",card1.Name);
+				else
+				{
+					if((strcmp(player2.deck.card[op-1].Name,"拳")!=0)&&(strcmp(player2.deck.card[op-1].Name,"腿")!=0)&&(strcmp(player2.deck.card[op-1].Name,"格挡")!=0))//卡牌非初始卡牌
+					Cards.cards[Card_loc2]=player2.deck.card[op-1];//交换牌库中卡牌
+					else;//卡牌是初始卡牌
+					player2.deck.card[op-1]=card1;//获得卡牌
+					Cards.NUM--;
+					for(int i=Card_loc2;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//从牌库中移除卡牌
+				}
 				}
 				getchar();
 				getchar();
@@ -910,14 +946,22 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 	}
 	else//玩家2胜利
 	{
-		printf(" 抽到了以下卡牌:\n");
-		printf(" 卡牌1: %s ",card1.Name);
-		Show_Card(card1);
-		printf(" 卡牌2: %s ",card2.Name);
-		Show_Card(card2);
-		printf(" 请选择一张牌加入套牌中,或者放弃选择!\n");
-		printf(" 1.卡牌1 2.卡牌2 0.放弃选择\n");
-		scanf("%d",&op);
+		if(!player2.bot)
+		{
+			printf(" 抽到了以下卡牌:\n\n");
+			printf(" 卡牌1: %s \n",card1.Name);
+			Show_Card(card1);
+			printf(" 卡牌2: %s \n",card2.Name);
+			Show_Card(card2);
+			printf(" 请 %s 选择一张牌加入套牌中,或者放弃选择!\n",player2.playername);
+			printf(" 1.卡牌1 2.卡牌2 0.放弃选择\n");
+			scanf("%d",&op);
+		}
+		else
+		{
+			printf(" %s 抽牌完毕!\n",player2.playername);
+			op=rand()%2+1;
+		}
 		if(op==0);//放弃
 		else if(op==1)//卡牌1
 		{
@@ -925,7 +969,10 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				printf(" %s ",player2.playername);
 				if(player2.deck.CardNum<20)//套牌未满
 				{
+					if(!player2.bot)//人
 					printf("已将 %s 加入套牌中!\n",card1.Name);
+					else//机器人
+					printf("行动完成!\n");
 					player2.deck.card[player2.deck.CardNum]=card1;//获得卡牌
 					Cards.NUM--;
 					player2.deck.CardNum++;
@@ -934,16 +981,23 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				}
 				else//套牌已满
 				{
-					printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
-					Show_Deck(player2.deck);
-					printf(" 1~20.交换 0.放弃\n");
-					scanf("%d",&op);
+					if(!player2.bot)//人
+					{
+						printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
+						Show_Deck(player2.deck);
+						printf(" 1~20.交换 0.放弃\n");
+						scanf("%d",&op);
+					}
+					else//机器
+					{
+						op=rand()%21;
+					}
 					if(op==0)
 					printf(" 放弃获得卡牌 %s !\n",card1.Name);
 					else
 					{
 						if((strcmp(player2.deck.card[op-1].Name,"拳")!=0)&&(strcmp(player2.deck.card[op-1].Name,"腿")!=0)&&(strcmp(player2.deck.card[op-1].Name,"格挡")!=0))//卡牌非初始卡牌
-						Cards.cards[Card_loc1]=player2.deck.card[op-1];//交换牌库中卡牌
+						Cards.cards[Card_loc2]=player2.deck.card[op-1];//交换牌库中卡牌
 						else;//卡牌是初始卡牌
 						player2.deck.card[op-1]=card1;//获得卡牌
 						Cards.NUM--;
@@ -995,7 +1049,10 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				printf(" %s ",player2.playername);
 				if(player2.deck.CardNum<20)//套牌未满
 				{
+					if(!player2.bot)//人
 					printf("已将 %s 加入套牌中!\n",card2.Name);
+					else//机器人
+					printf("行动完成!\n");
 					player2.deck.card[player2.deck.CardNum]=card2;//获得卡牌
 					Cards.NUM--;
 					player2.deck.CardNum++;
@@ -1004,10 +1061,17 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				}
 				else//套牌已满
 				{
-					printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
-					Show_Deck(player2.deck);
-					printf(" 1~20.交换 0.放弃\n");
-					scanf("%d",&op);
+					if(!player2.bot)//人
+					{
+						printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
+						Show_Deck(player2.deck);
+						printf(" 1~20.交换 0.放弃\n");
+						scanf("%d",&op);
+					}
+					else//机器
+					{
+						op=rand()%21;
+					}
 					if(op==0)
 					printf(" 放弃获得卡牌 %s !\n",card2.Name);
 					else
