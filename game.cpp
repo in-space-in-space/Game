@@ -51,7 +51,7 @@ typedef struct player //��Ҷ���
     int action;//�ϻغ��ж�,1Ϊ����,0Ϊ����
 }player;
 /*------------------------------���岿��--------------------------------------------*/
-int Name_Initialize(player& player1, player& player2);
+void Name_Initialize(player& player1, player& player2);
 int Cards_Initialize(Cards& cards);
 void Deck_Initialize(player &player);
 int PlayTurn(Cards cards, player& player1, player& player2);
@@ -115,7 +115,7 @@ int main()
 	}
 	return 0;
 }
-int Name_Initialize(player& player1, player& player2)
+void Name_Initialize(player& player1, player& player2)
 {
 	strcpy(player1.playername,"���1");
 	if(!player2.bot)
@@ -233,14 +233,20 @@ int StartTurn(player& player1, player& player2)//��Ϸ��ʼǰ���ƺ;
 	Start_Drawing(player1);
 	Start_Drawing(player2);
 	if (First_Attack_Decide())
-		player1.Turn_mode = 1;
+		{
+			player1.Turn_mode = 1;
+			player2.Turn_mode=0;
+		}
 	else
-		player2.Turn_mode = 1;
-	if (player1.Turn_mode)
-		printf(" %s ����ȹ�!\n", player1.playername);
-	else
-		printf(" %s ����ȹ�!\n", player2.playername);
-	getchar();
+		{
+			player2.Turn_mode = 1;
+			player1.Turn_mode=0;
+		}
+    if(player1.Turn_mode)
+    printf(" %s ����ȹ�!\n",player1.playername);
+    else
+    printf(" %s ����ȹ�!\n",player2.playername);
+    getchar();
 	return player1.Turn_mode;
 }
 int First_Attack_Decide() /*�����ȹ�*/
@@ -497,7 +503,7 @@ void Show_Card(Card card)//��ʾ������Ϣ
 	else
 	printf(" �����ȼ�:");
 	printf(" %d\n",card.Level);
-	printf(" %s\n",card.text);
+	printf(" %s\n\n",card.text);
 }
 void Show_Deck(Deck deck)//��ʾ������Ϣ
 {
@@ -682,6 +688,7 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//����
 	card1=Cards.cards[Card_loc1];
 	Card_loc2=rand()%Cards.NUM;
 	card2=Cards.cards[Card_loc2];
+	printf(" �������ƻ�ȡ:\n");
 	if(winner==0)//ƽ��
 	{
 		{//���1��ÿ���
@@ -719,11 +726,19 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//����
 			system("cls");
 		}
 		{//���2��ÿ���
-			printf(" %s �鵽�˿��� %s!\n\n",player2.playername,card2.Name);
-			Show_Card(card2);
-			if(player2.deck.CardNum<20)//����δ��
+			if(!player2.bot)//����
 			{
-				printf("�ѽ� %s ����������!\n",card2.Name);
+				printf(" %s �鵽�˿��� %s!\n\n",player2.playername,card2.Name);
+				Show_Card(card2);
+			}
+			else//������
+			printf(" %s �����˳鵽�˿���!\n\n");
+			if(player2.deck.CardNum<20)//����δ��
+			{	
+				if(!player2.bot)//��
+				printf(" �ѽ� %s ����������!\n",card2.Name);
+				else//����
+				printf(" %s ���ѡ��!\n",player2.playername);
 				player2.deck.card[player2.deck.CardNum]=card2;//��ÿ���
 				Cards.NUM--;
 				player2.deck.CardNum++;
@@ -732,10 +747,17 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//����
 			}
 			else//��������
 			{
-				printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
-				Show_Deck(player2.deck);
-				printf(" 1~20.���� 0.����\n");
-				scanf("%d",&op);
+				if(!player2.bot)//��
+				{
+					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+					Show_Deck(player2.deck);
+					printf(" 1~20.���� 0.����\n");
+					scanf("%d",&op);
+				}
+				else//����
+				{
+					op=rand()%21;
+				}
 				if(op==0)
 				printf(" ������ÿ��� %s !\n",card2.Name);
 				else
@@ -755,10 +777,10 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//����
 	}
 	else if(winner==1)//���1ʤ��
 	{
-		printf(" �鵽�����¿���:\n");
-		printf(" ����1: %s ",card1.Name);
+		printf(" �鵽�����¿���:\n\n");
+		printf(" ����1: %s \n",card1.Name);
 		Show_Card(card1);
-		printf(" ����2: %s ",card2.Name);
+		printf(" ����2: %s \n",card2.Name);
 		Show_Card(card2);
 		printf(" �� %s ѡ��һ���Ƽ���������,���߷���ѡ��!\n",player1.playername);
 		printf(" 1.����1 2.����2 0.����ѡ��\n");
@@ -814,10 +836,17 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//����
 				}
 				else//��������
 				{
-					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
-					Show_Deck(player2.deck);
-					printf(" 1~20.���� 0.����\n");
-					scanf("%d",&op);
+					if(!player2.bot)//��
+					{
+						printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+						Show_Deck(player2.deck);
+						printf(" 1~20.���� 0.����\n");
+						scanf("%d",&op);
+					}
+					else//����
+					{
+						op=rand()%21;
+					}
 					if(op==0)
 					printf(" ������ÿ��� %s !\n",card2.Name);
 					else
@@ -884,22 +913,29 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//����
 				}
 				else//��������
 				{
+					if(!player2.bot)//��
+				{
 					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
 					Show_Deck(player2.deck);
 					printf(" 1~20.���� 0.����\n");
 					scanf("%d",&op);
-					if(op==0)
-					printf(" ������ÿ��� %s !\n",card1.Name);
-					else
-					{
-						if((strcmp(player2.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
-						Cards.cards[Card_loc1]=player2.deck.card[op-1];//�����ƿ��п���
-						else;//�����ǳ�ʼ����
-						player2.deck.card[op-1]=card1;//��ÿ���
-						Cards.NUM--;
-						for(int i=Card_loc1;i<Cards.NUM;i++)
-						Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
-					}
+				}
+				else//����
+				{
+					op=rand()%21;
+				}
+				if(op==0)
+				printf(" ������ÿ��� %s !\n",card1.Name);
+				else
+				{
+					if((strcmp(player2.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+					Cards.cards[Card_loc2]=player2.deck.card[op-1];//�����ƿ��п���
+					else;//�����ǳ�ʼ����
+					player2.deck.card[op-1]=card1;//��ÿ���
+					Cards.NUM--;
+					for(int i=Card_loc2;i<Cards.NUM;i++)
+					Cards.cards[i]=Cards.cards[i+1];//���ƿ����Ƴ�����
+				}
 				}
 				getchar();
 				getchar();
@@ -909,14 +945,22 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//����
 	}
 	else//���2ʤ��
 	{
-		printf(" �鵽�����¿���:\n");
-		printf(" ����1: %s ",card1.Name);
-		Show_Card(card1);
-		printf(" ����2: %s ",card2.Name);
-		Show_Card(card2);
-		printf(" ��ѡ��һ���Ƽ���������,���߷���ѡ��!\n");
-		printf(" 1.����1 2.����2 0.����ѡ��\n");
-		scanf("%d",&op);
+		if(!player2.bot)
+		{
+			printf(" �鵽�����¿���:\n\n");
+			printf(" ����1: %s \n",card1.Name);
+			Show_Card(card1);
+			printf(" ����2: %s \n",card2.Name);
+			Show_Card(card2);
+			printf(" �� %s ѡ��һ���Ƽ���������,���߷���ѡ��!\n",player2.playername);
+			printf(" 1.����1 2.����2 0.����ѡ��\n");
+			scanf("%d",&op);
+		}
+		else
+		{
+			printf(" %s �������!\n",player2.playername);
+			op=rand()%2+1;
+		}
 		if(op==0);//����
 		else if(op==1)//����1
 		{
@@ -924,7 +968,10 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//����
 				printf(" %s ",player2.playername);
 				if(player2.deck.CardNum<20)//����δ��
 				{
+					if(!player2.bot)//��
 					printf("�ѽ� %s ����������!\n",card1.Name);
+					else//������
+					printf("�ж����!\n");
 					player2.deck.card[player2.deck.CardNum]=card1;//��ÿ���
 					Cards.NUM--;
 					player2.deck.CardNum++;
@@ -937,12 +984,22 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//����
 					Show_Deck(player2.deck);
 					printf(" 1~20.���� 0.����\n");
 					scanf("%d",&op);
+						scanf("%d",&op);
+					}
+					else//����
+					{
+						op=rand()%21;
+					}
 					if(op==0)
 					printf(" ������ÿ��� %s !\n",card1.Name);
 					else
 					{
 						if((strcmp(player2.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
 						Cards.cards[Card_loc1]=player2.deck.card[op-1];//�����ƿ��п���
+						else;//�����ǳ�ʼ����
+						player2.deck.card[op-1]=card1;//��ÿ���
+						if((strcmp(player2.deck.card[op-1].Name,"ȭ")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0)&&(strcmp(player2.deck.card[op-1].Name,"��")!=0))//���Ʒǳ�ʼ����
+						Cards.cards[Card_loc2]=player2.deck.card[op-1];//�����ƿ��п���
 						else;//�����ǳ�ʼ����
 						player2.deck.card[op-1]=card1;//��ÿ���
 						Cards.NUM--;
@@ -994,7 +1051,10 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//����
 				printf(" %s ",player2.playername);
 				if(player2.deck.CardNum<20)//����δ��
 				{
+					if(!player2.bot)//��
 					printf("�ѽ� %s ����������!\n",card2.Name);
+					else//������
+					printf("�ж����!\n");
 					player2.deck.card[player2.deck.CardNum]=card2;//��ÿ���
 					Cards.NUM--;
 					player2.deck.CardNum++;
@@ -1003,10 +1063,17 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//����
 				}
 				else//��������
 				{
-					printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
-					Show_Deck(player2.deck);
-					printf(" 1~20.���� 0.����\n");
-					scanf("%d",&op);
+					if(!player2.bot)//��
+					{
+						printf(" ��������,��ѡ��һ��������ƽ����������ø���!\n");
+						Show_Deck(player2.deck);
+						printf(" 1~20.���� 0.����\n");
+						scanf("%d",&op);
+					}
+					else//����
+					{
+						op=rand()%21;
+					}
 					if(op==0)
 					printf(" ������ÿ��� %s !\n",card2.Name);
 					else
