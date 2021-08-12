@@ -66,19 +66,27 @@ void Show_HP(player player);
 void Show_Hand(player player);
 void Show_Card(Card card);
 void Show_Deck(Deck deck);
+void Show_Used(player player1,player player2);
 int Settlement(player& player1,player& player2);
 void Level_calculate(player &player);
-void Card_damage(player& player1,player& player2);
+void Result(player& player1,player& player2);
 int If_Over(player player1,player player2);
 int PlayTurn_Over(player player1, player player2, int flag);
 int GetCard(Cards &cards,player &player1,player &player2,int winner);
 void Card_function(player &player1,player &player2);
-int Fun_0_yazhi(player &player1,player &player2);
+/*------------------------------关键字函数-----------------------------------------*/
+void Fun_1_yazhi(player &player1,player &player2);
+void Fun_4_gongxin(player &player1,player &player2);
+void Fun_11_chakan(player &player1,player &player2);
+/*------------------------------电脑行动函数----------------------------------------*/
 int Bot_choose(player &player);
 int Bot_Draw(player &player);
 int Bot_Use(player &player);
 /*------------------------------卡牌效果函数----------------------------------------*/
 void Ge_Dang(player &player1,player &player2);
+void Qin_Na(player &player1,player &player2);
+void Sao_Tang(player &player1,player &player2);
+void Ma_Bu(player &player1,player &player2);
 /*------------------------------函数部分--------------------------------------------*/
 int main()
 {
@@ -126,7 +134,7 @@ void Name_Initialize(player& player1, player& player2)
 void Deck_Initialize(player &player)//卡组初始化
 {
 	srand(time(NULL));
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		strcpy(player.deck.card[i].Name, "拳");
 		strcpy(player.deck.card[i].text, "无");
@@ -134,7 +142,7 @@ void Deck_Initialize(player &player)//卡组初始化
 		player.deck.card[i].Kind = 0;
 		player.deck.card[i].Type = 1;
 	}
-	for (int i = 5; i < 7; i++)
+	for (int i = 10; i < 14; i++)
 	{
 		strcpy(player.deck.card[i].Name, "腿");
 		strcpy(player.deck.card[i].text, "无");
@@ -142,16 +150,16 @@ void Deck_Initialize(player &player)//卡组初始化
 		player.deck.card[i].Kind = 0;
 		player.deck.card[i].Type = 1;
 	}
-	for (int i = 7; i < 10; i++)
+	for (int i = 14; i < 20; i++)
 	{
 		strcpy(player.deck.card[i].Name, "格挡");
 		strcpy(player.deck.card[i].text, "压制:抽一张牌或打出一张攻击牌");
 		player.deck.card[i].Level = 2;
-		player.deck.card[i].Fun[0] = 1;
+		player.deck.card[i].Fun[1] = 1;
 		player.deck.card[i].Kind = 0;
 		player.deck.card[i].Type = 0;
 	}
-	player.deck.CardNum = 10;
+	player.deck.CardNum = 20;
 }
 int Cards_Initialize(Cards& Cards)//从文件中获取卡牌
 {
@@ -508,19 +516,43 @@ void Show_Card(Card card)//显示卡牌信息
 }
 void Show_Deck(Deck deck)//显示套牌信息
 {
-	for(int i=0;i<deck.CardNum;i++)
+	for(int i=1;i<=deck.CardNum;i++)
 	{
-		printf("%d.%-8s",i+1,deck.card[i].Name);
+		printf("%-2d.%-8s",i,deck.card[i-1].Name);
 		if(!(i%5))
 		printf("\n");
 	}
+}
+void Show_Used(player player1,player player2)//显示本回合使用的卡牌
+{
+    printf(" 进攻方 %s 选择 ",player1.playername);
+    if(player1.action==1)
+	printf("出牌\n %s 打出的牌是:%2s  卡牌等级:%d  卡牌效果:%s\n\n",player1.playername,player1.Card_used.Name,player1.Card_used.Level,player1.Card_used.text);
+    else if(player1.action==0)
+    printf("抽牌\n\n");
+	else 
+	printf("跳过回合\n");
+    printf(" 防御方 %s 选择 ",player2.playername);
+    if(player2.action==1)
+    printf("出牌\n %s 打出的牌是:%2s  卡牌等级:%d  卡牌效果:%s\n\n",player2.playername,player2.Card_used.Name,player2.Card_used.Level,player2.Card_used.text);
+    else if(player2.action==0)
+    printf("抽牌\n\n");
+	else 
+	printf("跳过回合\n");
 }
 int Settlement(player& player1,player& player2)/*结算阶段*/
 {
     Level_calculate(player1);
     Level_calculate(player2);
-	Card_damage(player1,player2);
+	if(player1.Turn_mode)//玩家1进攻
+	Show_Used(player1,player2);
+	else//玩家2进攻
+	Show_Used(player2,player1);
 	Card_function(player1,player2);
+	if(player1.Turn_mode)//玩家1进攻
+	Result(player1,player2);
+	else//玩家2进攻
+	Result(player2,player1);
     return 0;
 }
 void Level_calculate(player &player)//计算卡牌等级
@@ -541,87 +573,31 @@ void Level_calculate(player &player)//计算卡牌等级
 		player.Defence_level_plus=0;
 	}
 }
-void Card_damage(player& player1,player& player2)//计算卡牌等级造成的伤害
+void Result(player& player1,player& player2)//卡牌使用结果
 {
 	int damage;
-	if(player1.Turn_mode)
+    printf(" 结算结果:");
+    if(player1.action==1&&player2.action==1&&(player1.Card_used.Level>player2.Card_used.Level))
     {
-        printf(" 进攻方 %s 选择 ",player1.playername);
-        if(player1.action==1)
-        printf("出牌\n %s 打出的牌是:%2s  卡牌等级:%d  卡牌效果:%s\n\n",player1.playername,player1.Card_used.Name,player1.Card_used.Level,player1.Card_used.text);
-        else if(player1.action==0)
-        printf("抽牌\n\n");
-		else 
-		printf("跳过回合\n");
-        printf(" 防御方 %s 选择 ",player2.playername);
-        if(player2.action==1)
-        printf("出牌\n %s 打出的牌是:%2s  卡牌等级:%d  卡牌效果:%s\n\n",player2.playername,player2.Card_used.Name,player2.Card_used.Level,player2.Card_used.text);
-        else if(player2.action==0)
-        printf("抽牌\n\n");
-		else 
-		printf("跳过回合\n");
-        printf(" 结算结果:");
-        if(player1.action==1&&player2.action==1&&(player1.Card_used.Level>player2.Card_used.Level))
-        {
-            damage=player1.Card_used.Level-player2.Card_used.Level;
-            player2.HP-=damage;
-            printf(" %s 对 %s 造成了 %d 点伤害!\n",player1.playername,player2.playername,damage);
-        }
-		else if(player1.action==1&&player2.action!=1)
-		{
-			damage=player1.Card_used.Level;
-			player2.HP-=damage;
-			printf(" %s 对 %s 造成了 %d 点伤害!\n",player1.playername,player2.playername,damage);
-		}
-        else if(player1.action!=1||player1.Card_used.Level<player2.Card_used.Level)
-        {
-            player1.Turn_mode=0;
-            player2.Turn_mode=1;
-            printf(" 攻守交换!");
-        }
-		else printf(" 无事发生");
-		getchar();
-		system("cls");
+        damage=player1.Card_used.Level-player2.Card_used.Level;
+        player2.HP-=damage;
+        printf(" %s 对 %s 造成了 %d 点伤害!\n",player1.playername,player2.playername,damage);
     }
-    else
+	else if(player1.action==1&&player2.action!=1)
+	{
+		damage=player1.Card_used.Level;
+		player2.HP-=damage;
+		printf(" %s 对 %s 造成了 %d 点伤害!\n",player1.playername,player2.playername,damage);
+	}
+    else if(player1.action!=1||player1.Card_used.Level<player2.Card_used.Level)
     {
-        printf(" 进攻方 %s 选择 ",player2.playername);
-        if(player2.action==1)
-        printf("出牌\n %s 打出的牌是 %4s  卡牌等级 %d  卡牌效果 %s\n",player2.playername,player2.Card_used.Name,player2.Card_used.Level,player2.Card_used.text);
-        else if(player2.action==0)
-        printf("抽牌\n\n");
-		else 
-		printf("跳过回合\n");
-        printf(" 防御方 %s 选择 ",player1.playername);
-        if(player1.action==1)
-        printf("出牌\n %s 打出的牌是 %4s  卡牌等级 %d  卡牌效果 %s\n",player1.playername,player1.Card_used.Name,player1.Card_used.Level,player1.Card_used.text);
-        else if(player1.action==0)
-        printf("抽牌\n\n");
-		else 
-		printf("跳过回合\n");
-		printf(" 结算结果:");
-        if(player1.action==1&&player2.action==1&&(player2.Card_used.Level>player1.Card_used.Level))
-        {
-            damage=player2.Card_used.Level-player1.Card_used.Level;
-            player1.HP-=damage;
-            printf(" %s 对 %s 造成了 %d 点伤害!\n",player2.playername,player1.playername,damage);
-        }
-		else if(player2.action==1&&player1.action!=1)
-		{
-			damage=player2.Card_used.Level;
-			player1.HP-=damage;
-			printf(" %s 对 %s 造成了 %d 点伤害!\n",player2.playername,player1.playername,damage);
-		}
-		else if(player2.action!=1||player2.Card_used.Level<player1.Card_used.Level)
-        {
-            player2.Turn_mode=0;
-            player1.Turn_mode=1;
-            printf(" 攻守交换!");
-        }
-		else printf(" 无事发生");
-		getchar();
-		system("cls");
+        player1.Turn_mode=0;
+        player2.Turn_mode=1;
+        printf(" 攻守交换!");
     }
+	else printf(" 无事发生");
+	getchar();
+	system("cls");
 }
 int If_Over(player player1,player player2)//判断游戏是否结束.
 {
@@ -828,6 +804,8 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				printf(" %s ",player2.playername);
 				if(player2.deck.CardNum<20)//套牌未满
 				{
+					printf(" 获得的卡牌是 %s \n",card2.Name);
+					Show_Card(card2);
 					printf("已将 %s 加入套牌中!\n",card2.Name);
 					player2.deck.card[player2.deck.CardNum]=card2;//获得卡牌
 					Cards.NUM--;
@@ -839,6 +817,8 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				{
 					if(!player2.bot)//人
 					{
+						printf(" 获得的卡牌是 %s \n",card2.Name);
+						Show_Card(card2);
 						printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
 						Show_Deck(player2.deck);
 						printf(" 1~20.交换 0.放弃\n");
@@ -905,6 +885,8 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				printf(" %s ",player2.playername);
 				if(player2.deck.CardNum<20)//套牌未满
 				{
+					printf(" 获得的卡牌是 %s \n",card1.Name);
+					Show_Card(card1);
 					printf("已将 %s 加入套牌中!\n",card1.Name);
 					player2.deck.card[player2.deck.CardNum]=card1;//获得卡牌
 					Cards.NUM--;
@@ -916,6 +898,8 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				{
 					if(!player2.bot)//人
 				{
+					printf(" 获得的卡牌是 %s \n",card1.Name);
+					Show_Card(card1);
 					printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
 					Show_Deck(player2.deck);
 					printf(" 1~20.交换 0.放弃\n");
@@ -1013,6 +997,8 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				printf(" %s ",player1.playername);
 				if(player1.deck.CardNum<20)//套牌未满
 				{
+					printf(" 获得的卡牌是 %s \n",card2.Name);
+					Show_Card(card2);
 					printf("已将 %s 加入套牌中!\n",card2.Name);
 					player1.deck.card[player1.deck.CardNum]=card2;//获得卡牌
 					Cards.NUM--;
@@ -1022,6 +1008,8 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				}
 				else//套牌已满
 				{
+					printf(" 获得的卡牌是 %s \n",card2.Name);
+						Show_Card(card2);
 					printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
 					Show_Deck(player1.deck);
 					printf(" 1~20.交换 0.放弃\n");
@@ -1093,6 +1081,8 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 			printf(" %s ",player1.playername);
 				if(player1.deck.CardNum<20)//套牌未满
 				{
+					printf(" 获得的卡牌是 %s \n",card1.Name);
+					Show_Card(card1);
 					printf("已将 %s 加入套牌中!\n",card1.Name);
 					player1.deck.card[player1.deck.CardNum]=card1;//获得卡牌
 					Cards.NUM--;
@@ -1102,6 +1092,8 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 				}
 				else//套牌已满
 				{
+					printf(" 获得的卡牌是 %s \n",card1.Name);
+						Show_Card(card1);
 					printf(" 套牌已满,请选择一张牌与该牌交换或放弃获得该牌!\n");
 					Show_Deck(player1.deck);
 					printf(" 1~20.交换 0.放弃\n");
@@ -1129,34 +1121,73 @@ int GetCard(Cards &Cards,player &player1,player &player2,int winner)//卡牌获取函
 }
 void Card_function(player &player1,player &player2)//卡牌效果触发函数
 {
+	{//不需要条件发动的卡牌
+		//玩家1使用的卡牌效果判断--------------------------------------------
+		if(player1.Card_used.Fun[11])//查看效果
+		{
+			if(player2.hand.CardNum)//有卡牌
+			Fun_11_chakan(player1,player2);
+			else//无卡牌
+			printf(" %s 没有手牌,无法查看!\n",player2.playername);
+		}
+
+		//玩家2使用的卡牌效果判断--------------------------------------------
+		if(player2.Card_used.Fun[11])//查看效果
+		{
+			if(player1.hand.CardNum)//有卡牌
+			Fun_11_chakan(player2,player1);
+			else//无卡牌
+			printf(" %s 没有手牌,无法查看!\n",player1.playername);
+		}
+	}
 	if(player1.action==1&&player2.action==1)//双方都出牌
 	{
 		//玩家1使用的卡牌效果判断--------------------------------------------
 		if(player1.Card_used.Fun[1])//压制效果
 		{
 			if(player1.Card_used.Level>player2.Card_used.Level)
-			Fun_0_yazhi(player1,player2);
+			Fun_1_yazhi(player1,player2);
 		}
 
 		//玩家2使用的卡牌效果判断--------------------------------------------
 		if(player2.Card_used.Fun[1])//压制效果
 		{
 			if(player2.Card_used.Level>player1.Card_used.Level)
-			Fun_0_yazhi(player2,player1);
+			Fun_1_yazhi(player2,player1);
 		}
 		return ;
 	}
 	else//攻心
-	;
+	{	
+		//玩家1使用的卡牌效果判断--------------------------------------------
+		if(player1.action==1&&player2.action==2)
+		Fun_4_gongxin(player1,player2);
+		//玩家2使用的卡牌效果判断--------------------------------------------
+		if(player2.action==1&&player1.action==2)
+		Fun_4_gongxin(player2,player1);
+	};
 }
-int Fun_0_yazhi(player &player1,player &player2)//所有压制效果触发函数
+/*------------------------------关键字函数-----------------------------------------*/
+void Fun_1_yazhi(player &player1,player &player2)//压制
 {
 	if(!strcmp(player1.Card_used.Name,"格挡"))// 格挡 的效果
 	Ge_Dang(player1,player2);
-	return 0;
+	else if(!strcmp(player1.Card_used.Name,"擒拿手"))// 擒拿手 的效果
+	Qin_Na(player1,player2);
+	return;
+}
+void Fun_4_gongxin(player &player1,player &player2)//攻心
+{
+	if(!strcmp(player1.Card_used.Name,"扫堂腿"))// 扫堂腿 的效果
+	Sao_Tang(player1,player2);
+}
+void Fun_11_chakan(player &player1,player &player2)//查看
+{
+	if(!strcmp(player1.Card_used.Name,"马步冲拳"))// 马步冲拳 的效果
+	Ma_Bu(player1,player2);
 }
 /*------------------------------卡牌效果函数----------------------------------------*/
-void Ge_Dang(player &player1,player &player2)
+void Ge_Dang(player &player1,player &player2)//格挡
 {
 	int op,Card_loc;
 	while(1)
@@ -1261,6 +1292,63 @@ void Ge_Dang(player &player1,player &player2)
 	getchar();
 	system("cls");
 	return;
+}
+void Qin_Na(player &player1,player &player2)//擒拿手
+{
+	int op;
+	printf(" \n%s 的卡牌 擒拿手 效果触发\n",player1.playername);
+	if(player2.hand.CardNum==0)//无手牌
+	printf(" %s 无手牌,无法弃牌!\n");
+	else//有手牌
+	{	
+		if(!player1.bot)//人
+		{
+			printf(" 请选择 %s 的一张手牌弃置,输入1~%d \n",player2.playername,player2.hand.CardNum);
+			scanf("%d",&op);
+			op--;
+		}
+		else//机器
+		op=rand()%player2.hand.CardNum;
+		printf(" %s 的手牌 %s 已被弃置!\n",player2.playername,player2.hand.card[op].Name);
+		player2.hand.CardNum--;
+		for(int i=op;i<player2.hand.CardNum;i++)
+		player2.hand.card[i]=player2.hand.card[i+1];
+	}
+	getchar();
+	getchar();
+	system("cls");
+}
+void Sao_Tang(player &player1,player &player2)//扫堂腿
+{
+	printf(" \n%s 的卡牌 扫堂腿 效果触发\n",player1.playername);
+	printf(" %s 对 %s 额外造成1点伤害!\n");
+	player2.HP--;
+	getchar();
+	getchar();
+	system("cls");
+}
+void Ma_Bu(player &player1,player &player2)
+{
+	int op;
+	printf(" \n%s 的卡牌 马步冲拳 效果触发\n",player1.playername);
+	if(!player1.bot)//人
+	{
+		printf(" 请选择 %s 手中的一张牌查看,请输入1~%d!\n",player2.playername,player2.hand.CardNum);
+		scanf("%d",&op);
+	}
+	else//机器
+	op=rand()%player2.hand.CardNum;
+	printf(" 该张卡牌是 %s !\n",player2.hand.card[op-1].Name);
+	if(player2.hand.card[op-1].Type)//攻击牌
+	{
+		printf(" 该牌为攻击牌,等级变为二者之和!\n");
+		player1.Card_used.Level+=player2.hand.card[op-1].Level;
+	}
+	else
+	printf(" 该牌非攻击牌\n");
+	getchar();
+	getchar();
+	system("cls");
 }
 /*------------------------------机器人函数------------------------------------------*/
 int Bot_choose(player &player)
